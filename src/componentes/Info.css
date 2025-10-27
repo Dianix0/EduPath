@@ -1,0 +1,68 @@
+.features {
+  text-align: center;
+  margin: 2rem auto;
+}
+
+.features .intro {
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+/* Grid de tarjetas más pequeñas y discretas */
+.feature-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.feature {
+  display: flex;               /* Activar flexbox */
+  flex-direction: column;      /* Apilar título y descripción verticalmente */
+  justify-content: center;     /* Centrado vertical */
+  align-items: center;         /* Centrado horizontal */
+  text-align: center;          /* Centrar el texto */
+  position: relative;
+  background: #ff7b00;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  width: 180px; 
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  overflow: hidden; 
+  min-height: 3rem; 
+  font-size: 0.95rem;
+}
+
+
+.feature h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Contenedor de descripción */
+.feature .description {
+  font-size: 0.875rem;
+  color: #ffffff;
+  margin-top: 0.5rem;
+  text-align: center;
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+/* Hover: expandir solo la tarjeta individual */
+.feature:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Mostrar la descripción expandiendo el contenedor dinámicamente */
+.feature:hover .description {
+  max-height: 200px; /* lo suficientemente grande para la mayoría de textos */
+  opacity: 1;
+}
