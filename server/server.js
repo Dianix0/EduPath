@@ -70,6 +70,8 @@ const PORT = process.env.PORT || 3000
 
 const start = async () => {
   try {
+
+    
     await lti.deploy({ port: PORT })
     console.log(`🚀 Backend LTI corriendo en http://localhost:${PORT}`)
 
