@@ -1,0 +1,6 @@
+flask
+flask-caching
+pylti1p3[flask]
+mysql-connector-python
+polars
+python-dotenv

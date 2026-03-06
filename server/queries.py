@@ -1,0 +1,124 @@
+# ============================================================
+# ESTUDIANTE
+# ============================================================
+
+GET_ALL_ESTUDIANTES = "SELECT * FROM Estudiante"
+
+GET_ESTUDIANTE_BY_ID = "SELECT * FROM Estudiante WHERE id = %s"
+
+INSERT_ESTUDIANTE = """
+    INSERT INTO Estudiante (nombre, edad, carrera, puntos, nivel)
+    VALUES (%s, %s, %s, %s, %s)
+"""
+
+UPDATE_ESTUDIANTE = """
+    UPDATE Estudiante
+    SET nombre = %s, edad = %s, carrera = %s, puntos = %s, nivel = %s
+    WHERE id = %s
+"""
+
+DELETE_ESTUDIANTE = "DELETE FROM Estudiante WHERE id = %s"
+
+# ---- Intereses ----
+
+GET_INTERESES_BY_ESTUDIANTE = (
+    "SELECT * FROM EstudianteInteres WHERE estudiante_id = %s"
+)
+
+INSERT_INTERES = (
+    "INSERT INTO EstudianteInteres (estudiante_id, interes) VALUES (%s, %s)"
+)
+
+DELETE_INTERES = (
+    "DELETE FROM EstudianteInteres WHERE estudiante_id = %s AND interes = %s"
+)
+
+# ---- Insignias ----
+
+GET_INSIGNIAS_BY_ESTUDIANTE = (
+    "SELECT * FROM EstudianteInsignia WHERE estudiante_id = %s"
+)
+
+INSERT_INSIGNIA = (
+    "INSERT INTO EstudianteInsignia (estudiante_id, insignia) VALUES (%s, %s)"
+)
+
+DELETE_INSIGNIA = (
+    "DELETE FROM EstudianteInsignia WHERE estudiante_id = %s AND insignia = %s"
+)
+
+
+# ============================================================
+# CURSO
+# ============================================================
+
+GET_ALL_CURSOS = "SELECT * FROM Curso"
+
+GET_CURSO_BY_ID = "SELECT * FROM Curso WHERE id = %s"
+
+INSERT_CURSO = """
+    INSERT INTO Curso (titulo, descripcion, categoria, duracion)
+    VALUES (%s, %s, %s, %s)
+"""
+
+UPDATE_CURSO = """
+    UPDATE Curso
+    SET titulo = %s, descripcion = %s, categoria = %s, duracion = %s
+    WHERE id = %s
+"""
+
+DELETE_CURSO = "DELETE FROM Curso WHERE id = %s"
+
+# ---- Etiquetas ----
+
+GET_ETIQUETAS_BY_CURSO = (
+    "SELECT * FROM CursoEtiqueta WHERE curso_id = %s"
+)
+
+INSERT_ETIQUETA = (
+    "INSERT INTO CursoEtiqueta (curso_id, etiqueta) VALUES (%s, %s)"
+)
+
+DELETE_ETIQUETA = (
+    "DELETE FROM CursoEtiqueta WHERE curso_id = %s AND etiqueta = %s"
+)
+
+
+# ============================================================
+# INTERACCION CURSO
+# ============================================================
+
+GET_ALL_INTERACCIONES = "SELECT * FROM InteraccionCurso"
+
+GET_INTERACCION_BY_IDS = """
+    SELECT * FROM InteraccionCurso
+    WHERE estudiante_id = %s AND curso_id = %s
+"""
+
+GET_INTERACCIONES_BY_ESTUDIANTE = (
+    "SELECT * FROM InteraccionCurso WHERE estudiante_id = %s"
+)
+
+GET_INTERACCIONES_BY_CURSO = (
+    "SELECT * FROM InteraccionCurso WHERE curso_id = %s"
+)
+
+INSERT_INTERACCION = """
+    INSERT INTO InteraccionCurso
+        (estudiante_id, curso_id, calificacion, progreso, tiempo_visualizacion, fecha_ultima_actividad)
+    VALUES (%s, %s, %s, %s, %s, %s)
+"""
+
+UPDATE_INTERACCION = """
+    UPDATE InteraccionCurso
+    SET calificacion = %s,
+        progreso = %s,
+        tiempo_visualizacion = %s,
+        fecha_ultima_actividad = %s
+    WHERE estudiante_id = %s AND curso_id = %s
+"""
+
+DELETE_INTERACCION = """
+    DELETE FROM InteraccionCurso
+    WHERE estudiante_id = %s AND curso_id = %s
+"""
