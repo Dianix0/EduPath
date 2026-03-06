@@ -6,13 +6,16 @@ from pylti1p3.contrib.flask import (
     FlaskRequest,
     FlaskCacheDataStorage,
 )
+from cachelib import SimpleCache as _SimpleCache
+
+_cache = _SimpleCache()
 from pylti1p3.tool_config import ToolConfJsonFile
 
 lti_bp = Blueprint("lti", __name__)
 
 # Rutas base
 _SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_DIST_DIR   = os.path.join(_SERVER_DIR, "..", "dist")
+_DIST_DIR   = os.path.abspath(os.path.join(_SERVER_DIR, "..", "dist"))
 TOOL_CONF_PATH = os.path.join(_SERVER_DIR, "lti_config.json")
 
 
@@ -21,9 +24,7 @@ def _get_tool_conf():
 
 
 def _get_launch_data_storage():
-    # Importacion diferida para evitar circular imports con app.py
-    from app import cache
-    return FlaskCacheDataStorage(cache)
+    return FlaskCacheDataStorage(_cache)
 
 
 # ============================================================
@@ -31,6 +32,7 @@ def _get_launch_data_storage():
 # Registrar esta URL en Moodle como "Initiate login URI"
 # ============================================================
 @lti_bp.route("/oidc_login", methods=["GET", "POST"])
+@lti_bp.route("/login", methods=["GET", "POST"])
 def oidc_login():
     tool_conf   = _get_tool_conf()
     flask_req   = FlaskRequest()
@@ -44,7 +46,7 @@ def oidc_login():
         tool_conf,
         launch_data_storage=_get_launch_data_storage(),
     )
-    return oidc.enable_check_cookies().redirect(target_link_uri)
+    return oidc.redirect(target_link_uri)
 
 
 # ============================================================
