@@ -31,6 +31,8 @@ def create():
         q.INSERT_ESTUDIANTE,
         (
             data["nombre"],
+            data.get("email"),
+            data.get("moodle_id"),
             data.get("edad"),
             data.get("carrera"),
             data.get("puntos", 0),
@@ -47,6 +49,7 @@ def update(id):
         q.UPDATE_ESTUDIANTE,
         (
             data["nombre"],
+            data.get("email"),
             data.get("edad"),
             data.get("carrera"),
             data.get("puntos", 0),

@@ -1,0 +1,124 @@
+.pagcursos-container {
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
+
+.pagcursos-titulo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin-bottom: 0.5rem;
+}
+
+.pagcursos-subtitulo {
+  color: #777;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.pagcursos-empty {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+/* === CATEGORIAS === */
+.pagcursos-cats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.pagcursos-cat-card {
+  background-color: #fff;
+  border: 2px solid #ffe2c2;
+  border-radius: 12px;
+  padding: 1.5rem 1.25rem;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pagcursos-cat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(255, 123, 0, 0.15);
+  border-color: #ff7b00;
+}
+
+.pagcursos-cat-nombre {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ff7b00;
+}
+
+.pagcursos-cat-count {
+  font-size: 0.85rem;
+  color: #999;
+}
+
+/* === CURSOS === */
+.pagcursos-back {
+  background: none;
+  border: none;
+  color: #ff7b00;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+}
+
+.pagcursos-back:hover {
+  text-decoration: underline;
+}
+
+.pagcursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.pagcursos-card {
+  background-color: #fff;
+  border: 1px solid #ffe2c2;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pagcursos-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(255, 123, 0, 0.12);
+}
+
+.pagcursos-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0;
+}
+
+.pagcursos-desc {
+  font-size: 0.9rem;
+  color: #555;
+  flex-grow: 1;
+  line-height: 1.5;
+}
+
+.pagcursos-duracion {
+  font-size: 0.85rem;
+  color: #ff7b00;
+  font-weight: 600;
+  background-color: #fff5ec;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  align-self: flex-start;
+}

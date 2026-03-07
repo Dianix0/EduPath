@@ -5,6 +5,7 @@ from routes.estudiante import estudiante_bp
 from routes.curso import curso_bp
 from routes.interaccion import interaccion_bp
 from routes.lti import lti_bp
+from routes.sesion import sesion_bp
 
 load_dotenv()
 
@@ -28,6 +29,7 @@ app.register_blueprint(estudiante_bp)
 app.register_blueprint(curso_bp)
 app.register_blueprint(interaccion_bp)
 app.register_blueprint(lti_bp)
+app.register_blueprint(sesion_bp)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 3000))

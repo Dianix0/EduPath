@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, jsonify, send_from_directory
+from flask import Blueprint, jsonify, send_from_directory, session
 from pylti1p3.contrib.flask import (
     FlaskMessageLaunch,
     FlaskOIDCLogin,
@@ -10,6 +10,9 @@ from cachelib import SimpleCache as _SimpleCache
 
 _cache = _SimpleCache()
 from pylti1p3.tool_config import ToolConfJsonFile
+from db import execute_query, execute_command
+from utils import serialize
+import queries as q
 
 lti_bp = Blueprint("lti", __name__)
 
@@ -66,13 +69,23 @@ def launch():
 
     launch_data = message_launch.get_launch_data()
 
-    # Datos del usuario disponibles desde Moodle:
-    # launch_data.get("sub")              -> ID unico del usuario en Moodle
-    # launch_data.get("name")             -> Nombre completo
-    # launch_data.get("email")            -> Email
-    # launch_data.get("given_name")       -> Nombre
-    # launch_data.get("family_name")      -> Apellido
-    print(f"LTI Launch exitoso: {launch_data.get('name')} ({launch_data.get('sub')})")
+    moodle_id = str(launch_data.get("sub", ""))
+    nombre    = launch_data.get("name") or launch_data.get("given_name", "Sin nombre")
+    email     = launch_data.get("email", "")
+
+    df = execute_query(q.GET_ESTUDIANTE_BY_MOODLE_ID, (moodle_id,))
+
+    if df.is_empty():
+        result = execute_command(
+            q.INSERT_ESTUDIANTE,
+            (nombre, email, moodle_id, None, None, 0, 1),
+        )
+        session["estudiante_id"] = result["last_insert_id"]
+        print(f"LTI: nuevo estudiante registrado -> {nombre} ({moodle_id})")
+    else:
+        estudiante = serialize(df)[0]
+        session["estudiante_id"] = estudiante["id"]
+        print(f"LTI: estudiante existente -> {nombre} ({moodle_id})")
 
     return send_from_directory(_DIST_DIR, "index.html")
 

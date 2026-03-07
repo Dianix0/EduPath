@@ -69,6 +69,13 @@ def delete(id):
 # Etiquetas
 # ============================================================
 
+@curso_bp.get("/etiquetas")
+def get_all_etiquetas():
+    df = execute_query(q.GET_ALL_ETIQUETAS)
+    etiquetas = df["etiqueta"].to_list() if not df.is_empty() else []
+    return jsonify(etiquetas)
+
+
 @curso_bp.get("/<int:id>/etiquetas")
 def get_etiquetas(id):
     df = execute_query(q.GET_ETIQUETAS_BY_CURSO, (id,))
