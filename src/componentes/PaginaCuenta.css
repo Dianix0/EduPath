@@ -125,16 +125,20 @@
   color: #2d2d2d;
 }
 
-.cuenta-field input {
+.cuenta-field input,
+.cuenta-field select {
   border: 1.5px solid #ffe2c2;
   border-radius: 8px;
   padding: 0.6rem 0.85rem;
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s;
+  font-family: inherit;
+  background-color: #fff;
 }
 
-.cuenta-field input:focus {
+.cuenta-field input:focus,
+.cuenta-field select:focus {
   border-color: #ff7b00;
 }
 
@@ -190,7 +194,85 @@
   cursor: not-allowed;
 }
 
+/* === CONFIRMACION === */
+.cuenta-confirm {
+  background-color: #fffaf3;
+  border: 1.5px solid #ffb86b;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cuenta-confirm-msg {
+  font-size: 0.9rem;
+  color: #7a4500;
+  margin: 0;
+  font-weight: 600;
+}
+
+.cuenta-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cuenta-btn-cancel {
+  background-color: #fff;
+  color: #555;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.cuenta-btn-cancel:hover {
+  border-color: #ff7b00;
+  color: #ff7b00;
+}
+
 /* === INTERESES === */
+.intereses-cursos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.intereses-curso-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.intereses-curso-titulo {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 1.5px solid #ffe2c2;
+}
+
+.intereses-search {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #ffe2c2;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 1.25rem;
+  transition: border-color 0.2s;
+}
+
+.intereses-search:focus {
+  border-color: #ff7b00;
+}
+
 .intereses-subtitulo {
   color: #666;
   font-size: 0.9rem;

@@ -1,15 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ModalCompletarPerfil.css";
 
 export default function ModalCompletarPerfil({ usuario, onCompletado }) {
   const [edad, setEdad] = useState("");
   const [carrera, setCarrera] = useState("");
+  const [carreras, setCarreras] = useState([]);
+  const [cursosConEtiquetas, setCursosConEtiquetas] = useState([]);
+  const [interesesSeleccionados, setInteresesSeleccionados] = useState(new Set());
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
 
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/carreras").then((r) => r.json()),
+      fetch("/api/cursos/con-etiquetas").then((r) => r.json()),
+    ]).then(([listaCarreras, listaCursos]) => {
+      setCarreras(Array.isArray(listaCarreras) ? listaCarreras : []);
+      setCursosConEtiquetas(Array.isArray(listaCursos) ? listaCursos : []);
+    });
+  }, []);
+
+  const toggleInteres = (tag) => {
+    setInteresesSeleccionados((prev) => {
+      const s = new Set(prev);
+      s.has(tag) ? s.delete(tag) : s.add(tag);
+      return s;
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!edad || !carrera.trim()) {
+    if (!edad || !carrera) {
       setError("Por favor completa todos los campos.");
       return;
     }
@@ -17,13 +38,28 @@ export default function ModalCompletarPerfil({ usuario, onCompletado }) {
       setError("Ingresa una edad válida.");
       return;
     }
+    if (interesesSeleccionados.size === 0) {
+      setError("Selecciona al menos un interés.");
+      return;
+    }
     setCargando(true);
     fetch("/api/me/completar", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ edad: parseInt(edad), carrera: carrera.trim() }),
+      body: JSON.stringify({ edad: parseInt(edad), carrera: parseInt(carrera) }),
     })
       .then((res) => res.json())
+      .then((data) =>
+        Promise.all(
+          [...interesesSeleccionados].map((tag) =>
+            fetch("/api/me/intereses", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ interes: tag }),
+            })
+          )
+        ).then(() => data)
+      )
       .then((data) => {
         setCargando(false);
         onCompletado(data);
@@ -58,13 +94,51 @@ export default function ModalCompletarPerfil({ usuario, onCompletado }) {
 
           <div className="mcp-field">
             <label htmlFor="carrera">Carrera</label>
-            <input
+            <select
               id="carrera"
-              type="text"
               value={carrera}
               onChange={(e) => setCarrera(e.target.value)}
-              placeholder="Ej: Ingeniería de Sistemas"
-            />
+            >
+              <option value="">Selecciona tu carrera</option>
+              {carreras.map((c) => (
+                <option key={c.id} value={c.id}>{c.nombre}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mcp-field">
+            <label>
+              Intereses{" "}
+              <span className="mcp-label-hint">
+                (selecciona al menos uno)
+              </span>
+            </label>
+            {cursosConEtiquetas.length === 0 ? (
+              <p className="mcp-hint">Cargando etiquetas...</p>
+            ) : (
+              <div className="mcp-intereses-scroll">
+                {cursosConEtiquetas.map((curso) => (
+                  <div key={curso.id} className="mcp-curso-grupo">
+                    <p className="mcp-curso-titulo">{curso.titulo}</p>
+                    <div className="mcp-chips">
+                      {curso.etiquetas.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          className={`mcp-chip ${interesesSeleccionados.has(tag) ? "activo" : ""}`}
+                          onClick={() => toggleInteres(tag)}
+                        >
+                          {tag}
+                          <span className="mcp-chip-icono">
+                            {interesesSeleccionados.has(tag) ? "✓" : "+"}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {error && <p className="mcp-error">{error}</p>}

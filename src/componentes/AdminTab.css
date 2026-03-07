@@ -258,16 +258,20 @@
   gap: 0.5rem;
 }
 
-.at-tag-input input {
+.at-tag-input input,
+.at-tag-input select {
   flex: 1;
   border: 1.5px solid #ffe2c2;
   border-radius: 8px;
   padding: 0.5rem 0.8rem;
   font-size: 0.875rem;
   outline: none;
+  font-family: inherit;
+  background-color: #fff;
 }
 
-.at-tag-input input:focus { border-color: #ff7b00; }
+.at-tag-input input:focus,
+.at-tag-input select:focus { border-color: #ff7b00; }
 
 .at-form-actions {
   display: flex;

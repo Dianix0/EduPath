@@ -1,4 +1,17 @@
 # ============================================================
+# CARRERA
+# ============================================================
+
+GET_ALL_CARRERAS = "SELECT * FROM Carrera ORDER BY nombre"
+
+GET_CARRERA_BY_ID = "SELECT * FROM Carrera WHERE id = %s"
+
+INSERT_CARRERA = "INSERT INTO Carrera (nombre) VALUES (%s)"
+
+DELETE_CARRERA = "DELETE FROM Carrera WHERE id = %s"
+
+
+# ============================================================
 # ESTUDIANTE
 # ============================================================
 
@@ -84,6 +97,13 @@ DELETE_CURSO = "DELETE FROM Curso WHERE id = %s"
 # ---- Etiquetas ----
 
 GET_ALL_ETIQUETAS = "SELECT DISTINCT etiqueta FROM CursoEtiqueta ORDER BY etiqueta"
+
+GET_CURSOS_CON_ETIQUETAS = """
+    SELECT c.id, c.titulo, ce.etiqueta
+    FROM Curso c
+    JOIN CursoEtiqueta ce ON c.id = ce.curso_id
+    ORDER BY c.titulo, ce.etiqueta
+"""
 
 GET_ETIQUETAS_BY_CURSO = (
     "SELECT * FROM CursoEtiqueta WHERE curso_id = %s"
