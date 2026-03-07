@@ -6,6 +6,12 @@ import queries as q
 sesion_bp = Blueprint("sesion", __name__, url_prefix="/api")
 
 
+@sesion_bp.get("/carreras")
+def get_carreras():
+    df = execute_query(q.GET_ALL_CARRERAS)
+    return jsonify(serialize(df))
+
+
 @sesion_bp.get("/me")
 def get_me():
     estudiante_id = session.get("estudiante_id")

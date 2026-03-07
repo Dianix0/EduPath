@@ -76,6 +76,20 @@ def get_all_etiquetas():
     return jsonify(etiquetas)
 
 
+@curso_bp.get("/con-etiquetas")
+def get_cursos_con_etiquetas():
+    df = execute_query(q.GET_CURSOS_CON_ETIQUETAS)
+    if df.is_empty():
+        return jsonify([])
+    cursos = {}
+    for row in serialize(df):
+        cid = row["id"]
+        if cid not in cursos:
+            cursos[cid] = {"id": cid, "titulo": row["titulo"], "etiquetas": []}
+        cursos[cid]["etiquetas"].append(row["etiqueta"])
+    return jsonify(list(cursos.values()))
+
+
 @curso_bp.get("/<int:id>/etiquetas")
 def get_etiquetas(id):
     df = execute_query(q.GET_ETIQUETAS_BY_CURSO, (id,))
