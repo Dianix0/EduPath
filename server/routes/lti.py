@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, jsonify, send_file
+from flask import Blueprint, jsonify, send_from_directory
 from pylti1p3.contrib.flask import (
     FlaskMessageLaunch,
     FlaskOIDCLogin,
@@ -74,7 +74,7 @@ def launch():
     # launch_data.get("family_name")      -> Apellido
     print(f"LTI Launch exitoso: {launch_data.get('name')} ({launch_data.get('sub')})")
 
-    return send_file(os.path.join(_DIST_DIR, "index.html"))
+    return send_from_directory(_DIST_DIR, "index.html")
 
 
 # ============================================================

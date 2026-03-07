@@ -17,6 +17,12 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_secret_change_in_prod")
 def index():
     return send_from_directory(DIST_DIR, "index.html")
 
+@app.route("/<path:path>")
+def spa_fallback(path):
+    if path.startswith("api/"):
+        return {"error": "Not found"}, 404
+    return send_from_directory(DIST_DIR, "index.html")
+
 
 app.register_blueprint(estudiante_bp)
 app.register_blueprint(curso_bp)

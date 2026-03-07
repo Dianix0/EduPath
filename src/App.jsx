@@ -1,4 +1,5 @@
 import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Head from "./componentes/Head";
 import Info from "./componentes/Info";
 import Foot from "./componentes/Foot";
@@ -19,7 +20,7 @@ const usuario = {
   ]
 };
 
-function App() {
+function PaginaPrincipal() {
   return (
     <>
       <section id="inicio">
@@ -27,13 +28,13 @@ function App() {
       </section>
       <Info/>
       <section id="Progreso">
-      <Gamificacion 
-        nivel={usuario.nivel}
-        puntos={usuario.puntos}
-        puntosSiguienteNivel={usuario.puntosSiguienteNivel}
-        insignias={usuario.insignias}
-      />
-    </section>
+        <Gamificacion
+          nivel={usuario.nivel}
+          puntos={usuario.puntos}
+          puntosSiguienteNivel={usuario.puntosSiguienteNivel}
+          insignias={usuario.insignias}
+        />
+      </section>
       <section id="cursos">
         <Cursos/>
       </section>
@@ -42,6 +43,26 @@ function App() {
       </section>
       <Foot/>
     </>
+  );
+}
+
+function PaginaContacto() {
+  return (
+    <>
+      <Head/>
+      <Contacto/>
+      <Foot/>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<PaginaPrincipal />} />
+      <Route path="/launch" element={<Navigate to="/" replace />} />
+      <Route path="/contacto" element={<PaginaContacto />} />
+    </Routes>
   );
 }
 
