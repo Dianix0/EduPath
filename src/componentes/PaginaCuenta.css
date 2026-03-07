@@ -1,0 +1,257 @@
+.cuenta-container {
+  display: flex;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+  min-height: 60vh;
+  align-items: flex-start;
+}
+
+/* === SIDEBAR === */
+.cuenta-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #ffe2c2;
+  border-radius: 16px;
+  padding: 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: sticky;
+  top: 2rem;
+}
+
+.cuenta-avatar {
+  width: 64px;
+  height: 64px;
+  background-color: #ff7b00;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.cuenta-nombre-sidebar {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  text-align: center;
+  margin: 0;
+}
+
+.cuenta-email-sidebar {
+  font-size: 0.8rem;
+  color: #999;
+  text-align: center;
+  margin: 0 0 0.75rem;
+  word-break: break-all;
+}
+
+.cuenta-nav {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.cuenta-nav button {
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #555;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.cuenta-nav button:hover {
+  background-color: #fff5ec;
+  color: #ff7b00;
+}
+
+.cuenta-nav button.activo {
+  background-color: #fff5ec;
+  color: #ff7b00;
+  font-weight: 700;
+}
+
+/* === CONTENIDO PRINCIPAL === */
+.cuenta-contenido {
+  flex: 1;
+}
+
+.cuenta-panel {
+  background: #fff;
+  border: 1px solid #ffe2c2;
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.cuenta-panel h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin-bottom: 1.5rem;
+}
+
+/* === FORMULARIO === */
+.cuenta-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 460px;
+}
+
+.cuenta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cuenta-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2d2d2d;
+}
+
+.cuenta-field input {
+  border: 1.5px solid #ffe2c2;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cuenta-field input:focus {
+  border-color: #ff7b00;
+}
+
+.cuenta-field input.disabled {
+  background-color: #f9f9f9;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.cuenta-ok {
+  color: #2d8a4e;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.cuenta-error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.cuenta-loading {
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+.cuenta-no-sesion {
+  color: #666;
+  font-size: 1rem;
+  margin: auto;
+}
+
+.cuenta-btn {
+  align-self: flex-start;
+  background-color: #ff7b00;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.25rem;
+}
+
+.cuenta-btn:hover:not(:disabled) {
+  background-color: #e46d00;
+}
+
+.cuenta-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* === INTERESES === */
+.intereses-subtitulo {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.intereses-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.interes-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #f5f5f5;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interes-chip:hover {
+  border-color: #ff7b00;
+  color: #ff7b00;
+  background-color: #fff5ec;
+}
+
+.interes-chip.activo {
+  background-color: #ff7b00;
+  border-color: #ff7b00;
+  color: #fff;
+}
+
+.chip-icono {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 640px) {
+  .cuenta-container {
+    flex-direction: column;
+  }
+
+  .cuenta-sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .cuenta-nav {
+    flex-direction: row;
+  }
+
+  .cuenta-nav button {
+    flex: 1;
+    text-align: center;
+  }
+}
