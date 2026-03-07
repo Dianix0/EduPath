@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./PaginaCuenta.css";
+import AdminTab from "./AdminTab";
 
 function ConfiguracionTab({ usuario, onActualizado }) {
   const [email, setEmail] = useState(usuario.email || "");
@@ -43,6 +44,10 @@ function ConfiguracionTab({ usuario, onActualizado }) {
         <div className="cuenta-field">
           <label>Nombre</label>
           <input value={usuario.nombre} disabled className="disabled" />
+        </div>
+        <div className="cuenta-field">
+          <label>Rol</label>
+          <input value={usuario.rol || "Sin rol asignado"} disabled className="disabled" />
         </div>
         <div className="cuenta-field">
           <label>Email</label>
@@ -198,6 +203,14 @@ export default function PaginaCuenta() {
           >
             Intereses
           </button>
+          {usuario.rol === "Administrador" && (
+            <button
+              className={tab === "herramienta" ? "activo" : ""}
+              onClick={() => setTab("herramienta")}
+            >
+              Herramienta
+            </button>
+          )}
         </nav>
       </aside>
 
@@ -206,6 +219,12 @@ export default function PaginaCuenta() {
           <ConfiguracionTab usuario={usuario} onActualizado={setUsuario} />
         )}
         {tab === "intereses" && <InteresesTab />}
+        {tab === "herramienta" && (
+          <div className="cuenta-panel">
+            <h3>Configuración de la herramienta</h3>
+            <AdminTab />
+          </div>
+        )}
       </main>
     </div>
   );

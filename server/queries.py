@@ -9,9 +9,11 @@ GET_ESTUDIANTE_BY_ID = "SELECT * FROM Estudiante WHERE id = %s"
 GET_ESTUDIANTE_BY_MOODLE_ID = "SELECT * FROM Estudiante WHERE moodle_id = %s"
 
 INSERT_ESTUDIANTE = """
-    INSERT INTO Estudiante (nombre, email, moodle_id, edad, carrera, puntos, nivel)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO Estudiante (nombre, email, moodle_id, edad, carrera, puntos, nivel, rol)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
 """
+
+UPDATE_ESTUDIANTE_ROL = "UPDATE Estudiante SET rol = %s WHERE id = %s"
 
 UPDATE_ESTUDIANTE = """
     UPDATE Estudiante
@@ -114,6 +116,15 @@ GET_INTERACCIONES_BY_ESTUDIANTE = (
 GET_INTERACCIONES_BY_CURSO = (
     "SELECT * FROM InteraccionCurso WHERE curso_id = %s"
 )
+
+GET_INTERACCIONES_CON_TITULO = """
+    SELECT ic.estudiante_id, ic.curso_id, ic.calificacion, ic.progreso,
+           ic.tiempo_visualizacion, ic.fecha_ultima_actividad,
+           c.titulo AS curso_titulo
+    FROM InteraccionCurso ic
+    JOIN Curso c ON ic.curso_id = c.id
+    WHERE ic.estudiante_id = %s
+"""
 
 INSERT_INTERACCION = """
     INSERT INTO InteraccionCurso

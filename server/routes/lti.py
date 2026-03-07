@@ -73,19 +73,28 @@ def launch():
     nombre    = launch_data.get("name") or launch_data.get("given_name", "Sin nombre")
     email     = launch_data.get("email", "")
 
+    roles_lti = launch_data.get("https://purl.imsglobal.org/spec/lti/claim/roles", [])
+    if any("Administrator" in r for r in roles_lti):
+        rol = "Administrador"
+    elif any("Instructor" in r for r in roles_lti):
+        rol = "Instructor"
+    else:
+        rol = "Estudiante"
+
     df = execute_query(q.GET_ESTUDIANTE_BY_MOODLE_ID, (moodle_id,))
 
     if df.is_empty():
         result = execute_command(
             q.INSERT_ESTUDIANTE,
-            (nombre, email, moodle_id, None, None, 0, 1),
+            (nombre, email, moodle_id, None, None, 0, 1, rol),
         )
         session["estudiante_id"] = result["last_insert_id"]
-        print(f"LTI: nuevo estudiante registrado -> {nombre} ({moodle_id})")
+        print(f"LTI: nuevo estudiante registrado -> {nombre} ({moodle_id}) [{rol}]")
     else:
         estudiante = serialize(df)[0]
         session["estudiante_id"] = estudiante["id"]
-        print(f"LTI: estudiante existente -> {nombre} ({moodle_id})")
+        execute_command(q.UPDATE_ESTUDIANTE_ROL, (rol, estudiante["id"]))
+        print(f"LTI: estudiante existente -> {nombre} ({moodle_id}) [{rol}]")
 
     return send_from_directory(_DIST_DIR, "index.html")
 
