@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./Head.css";
 
 function Head() {
@@ -7,10 +8,11 @@ function Head() {
       <h1>EduPath</h1>
       <nav>
         <ul>
-          <li><a href="inicio">Inicio</a></li>
-          <li><a href="Progreso">Progreso</a></li>
-          <li><a href="cursos">Cursos</a></li>
-          <li><a href="contacto">Contacto</a></li>
+          <li><Link to="/#inicio">Inicio</Link></li>
+          <li><Link to="/#Progreso">Progreso</Link></li>
+          <li><Link to="/cursos">Cursos</Link></li>
+          <li><Link to="/contacto">Contacto</Link></li>
+          <li><Link to="/cuenta">Cuenta</Link></li>
         </ul>
       </nav>
     </header>

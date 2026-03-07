@@ -1,18 +1,24 @@
 import os
-from flask import Blueprint, jsonify, send_file
+from flask import Blueprint, jsonify, send_from_directory, session
 from pylti1p3.contrib.flask import (
     FlaskMessageLaunch,
     FlaskOIDCLogin,
     FlaskRequest,
     FlaskCacheDataStorage,
 )
+from cachelib import SimpleCache as _SimpleCache
+
+_cache = _SimpleCache()
 from pylti1p3.tool_config import ToolConfJsonFile
+from db import execute_query, execute_command
+from utils import serialize
+import queries as q
 
 lti_bp = Blueprint("lti", __name__)
 
 # Rutas base
 _SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_DIST_DIR   = os.path.join(_SERVER_DIR, "..", "dist")
+_DIST_DIR   = os.path.abspath(os.path.join(_SERVER_DIR, "..", "dist"))
 TOOL_CONF_PATH = os.path.join(_SERVER_DIR, "lti_config.json")
 
 
@@ -21,9 +27,7 @@ def _get_tool_conf():
 
 
 def _get_launch_data_storage():
-    # Importacion diferida para evitar circular imports con app.py
-    from app import cache
-    return FlaskCacheDataStorage(cache)
+    return FlaskCacheDataStorage(_cache)
 
 
 # ============================================================
@@ -31,6 +35,7 @@ def _get_launch_data_storage():
 # Registrar esta URL en Moodle como "Initiate login URI"
 # ============================================================
 @lti_bp.route("/oidc_login", methods=["GET", "POST"])
+@lti_bp.route("/login", methods=["GET", "POST"])
 def oidc_login():
     tool_conf   = _get_tool_conf()
     flask_req   = FlaskRequest()
@@ -44,7 +49,7 @@ def oidc_login():
         tool_conf,
         launch_data_storage=_get_launch_data_storage(),
     )
-    return oidc.enable_check_cookies().redirect(target_link_uri)
+    return oidc.redirect(target_link_uri)
 
 
 # ============================================================
@@ -64,15 +69,25 @@ def launch():
 
     launch_data = message_launch.get_launch_data()
 
-    # Datos del usuario disponibles desde Moodle:
-    # launch_data.get("sub")              -> ID unico del usuario en Moodle
-    # launch_data.get("name")             -> Nombre completo
-    # launch_data.get("email")            -> Email
-    # launch_data.get("given_name")       -> Nombre
-    # launch_data.get("family_name")      -> Apellido
-    print(f"LTI Launch exitoso: {launch_data.get('name')} ({launch_data.get('sub')})")
+    moodle_id = str(launch_data.get("sub", ""))
+    nombre    = launch_data.get("name") or launch_data.get("given_name", "Sin nombre")
+    email     = launch_data.get("email", "")
 
-    return send_file(os.path.join(_DIST_DIR, "index.html"))
+    df = execute_query(q.GET_ESTUDIANTE_BY_MOODLE_ID, (moodle_id,))
+
+    if df.is_empty():
+        result = execute_command(
+            q.INSERT_ESTUDIANTE,
+            (nombre, email, moodle_id, None, None, 0, 1),
+        )
+        session["estudiante_id"] = result["last_insert_id"]
+        print(f"LTI: nuevo estudiante registrado -> {nombre} ({moodle_id})")
+    else:
+        estudiante = serialize(df)[0]
+        session["estudiante_id"] = estudiante["id"]
+        print(f"LTI: estudiante existente -> {nombre} ({moodle_id})")
+
+    return send_from_directory(_DIST_DIR, "index.html")
 
 
 # ============================================================

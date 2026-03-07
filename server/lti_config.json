@@ -1,11 +1,11 @@
 {
-    "http://192.168.5.127/moodle": [
+    "http://192.168.5.106/moodle": [
         {
             "default": true,
             "client_id": "Wv8qjLbyUvCkOcb",
-            "auth_login_url": "http://192.168.5.127/moodle/mod/lti/auth.php",
-            "auth_token_url": "http://192.168.5.127/moodle/mod/lti/token.php",
-            "key_set_url": "http://192.168.5.127/moodle/mod/lti/certs.php",
+            "auth_login_url": "http://192.168.5.106/moodle/mod/lti/auth.php",
+            "auth_token_url": "http://192.168.5.106/moodle/mod/lti/token.php",
+            "key_set_url": "http://192.168.5.106/moodle/mod/lti/certs.php",
             "key_set": null,
             "private_key_file": "private.key",
             "public_key_file": "public.key",

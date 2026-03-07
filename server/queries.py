@@ -6,18 +6,28 @@ GET_ALL_ESTUDIANTES = "SELECT * FROM Estudiante"
 
 GET_ESTUDIANTE_BY_ID = "SELECT * FROM Estudiante WHERE id = %s"
 
+GET_ESTUDIANTE_BY_MOODLE_ID = "SELECT * FROM Estudiante WHERE moodle_id = %s"
+
 INSERT_ESTUDIANTE = """
-    INSERT INTO Estudiante (nombre, edad, carrera, puntos, nivel)
-    VALUES (%s, %s, %s, %s, %s)
+    INSERT INTO Estudiante (nombre, email, moodle_id, edad, carrera, puntos, nivel)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
 """
 
 UPDATE_ESTUDIANTE = """
     UPDATE Estudiante
-    SET nombre = %s, edad = %s, carrera = %s, puntos = %s, nivel = %s
+    SET nombre = %s, email = %s, edad = %s, carrera = %s, puntos = %s, nivel = %s
     WHERE id = %s
 """
 
 DELETE_ESTUDIANTE = "DELETE FROM Estudiante WHERE id = %s"
+
+UPDATE_ESTUDIANTE_COMPLETAR = """
+    UPDATE Estudiante SET edad = %s, carrera = %s WHERE id = %s
+"""
+
+UPDATE_ESTUDIANTE_CONFIGURACION = """
+    UPDATE Estudiante SET email = %s, edad = %s, carrera = %s WHERE id = %s
+"""
 
 # ---- Intereses ----
 
@@ -70,6 +80,8 @@ UPDATE_CURSO = """
 DELETE_CURSO = "DELETE FROM Curso WHERE id = %s"
 
 # ---- Etiquetas ----
+
+GET_ALL_ETIQUETAS = "SELECT DISTINCT etiqueta FROM CursoEtiqueta ORDER BY etiqueta"
 
 GET_ETIQUETAS_BY_CURSO = (
     "SELECT * FROM CursoEtiqueta WHERE curso_id = %s"
