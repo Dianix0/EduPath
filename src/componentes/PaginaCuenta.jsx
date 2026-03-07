@@ -15,7 +15,7 @@ function ConfiguracionTab({ usuario, onActualizado }) {
     setMensaje("");
     setError("");
     setCargando(true);
-    fetch("/api/me/configuracion", {
+    fetch("/api/me/configuracion", { credentials: 'include' }, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -95,8 +95,8 @@ function InteresesTab() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/cursos/etiquetas").then((r) => r.json()),
-      fetch("/api/me/intereses").then((r) => r.json()),
+      fetch("/api/cursos/etiquetas", { credentials: 'include' }).then((r) => r.json()),
+      fetch("/api/me/intereses", { credentials: 'include' }).then((r) => r.json()),
     ]).then(([tags, intereses]) => {
       setEtiquetas(Array.isArray(tags) ? tags : []);
       setMisIntereses(new Set(
@@ -110,6 +110,7 @@ function InteresesTab() {
     if (misIntereses.has(etiqueta)) {
       fetch(`/api/me/intereses/${encodeURIComponent(etiqueta)}`, {
         method: "DELETE",
+        credentials: 'include',
       }).then(() => {
         setMisIntereses((prev) => {
           const s = new Set(prev);
@@ -120,6 +121,7 @@ function InteresesTab() {
     } else {
       fetch("/api/me/intereses", {
         method: "POST",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ interes: etiqueta }),
       }).then(() => {
@@ -162,7 +164,7 @@ export default function PaginaCuenta() {
   const [sinSesion, setSinSesion] = useState(false);
 
   useEffect(() => {
-    fetch("/api/me")
+    fetch("/api/me", { credentials: 'include' })
       .then((res) => {
         if (!res.ok) { setSinSesion(true); return null; }
         return res.json();

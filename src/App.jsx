@@ -10,13 +10,6 @@ import PaginaCursos from './componentes/PaginaCursos';
 import PaginaCuenta from './componentes/PaginaCuenta';
 import ModalCompletarPerfil from './componentes/ModalCompletarPerfil';
 import './index.css';
-import insignia1 from "./img/Insg-principiante.png";
-import insignia2 from "./img/Insg-explorador.png";
-
-const insigniasFijas = [
-  { nombre: "Principiante", imagen: insignia1 },
-  { nombre: "Explorador", imagen: insignia2 },
-];
 
 function PaginaPrincipal({ usuario }) {
   return (
@@ -26,12 +19,7 @@ function PaginaPrincipal({ usuario }) {
       </section>
       <Info/>
       <section id="Progreso">
-        <Gamificacion
-          nivel={usuario?.nivel ?? 1}
-          puntos={usuario?.puntos ?? 0}
-          puntosSiguienteNivel={200}
-          insignias={insigniasFijas}
-        />
+        <Gamificacion/>
       </section>
       <section id="cursos">
         <Cursos/>
@@ -79,18 +67,42 @@ function App() {
   const [perfilPendiente, setPerfilPendiente] = useState(false);
 
   useEffect(() => {
-    fetch("/api/me")
-      .then((res) => {
-        if (!res.ok) return null;
-        return res.json();
-      })
-      .then((data) => {
-        if (!data) return;
-        setUsuario(data);
-        if (!data.edad || !data.carrera) {
-          setPerfilPendiente(true);
-        }
-      });
+    const params = new URLSearchParams(window.location.search)
+    const sid = params.get('sid')
+    
+    if (sid) {
+        // Establecer sesión en Flask
+        fetch("/api/me/set-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include',
+            body: JSON.stringify({ estudiante_id: parseInt(sid) })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.error) {
+                setUsuario(data)
+                if (!data.edad || !data.carrera) {
+                    setPerfilPendiente(true)
+                }
+            }
+        })
+        window.history.replaceState({}, '', '/')
+        return
+    }
+
+    fetch("/api/me", { credentials: 'include' })
+        .then((res) => {
+            if (!res.ok) return null
+            return res.json()
+        })
+        .then((data) => {
+            if (!data) return
+            setUsuario(data)
+            if (!data.edad || !data.carrera) {
+                setPerfilPendiente(true)
+            }
+        })
   }, []);
 
   const handlePerfilCompletado = (datosActualizados) => {

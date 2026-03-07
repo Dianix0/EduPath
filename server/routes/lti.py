@@ -95,9 +95,10 @@ def launch():
         session["estudiante_id"] = estudiante["id"]
         execute_command(q.UPDATE_ESTUDIANTE_ROL, (rol, estudiante["id"]))
         print(f"LTI: estudiante existente -> {nombre} ({moodle_id}) [{rol}]")
-
-    return send_from_directory(_DIST_DIR, "index.html")
-
+#
+    from flask import redirect
+    estudiante_id = session.get("estudiante_id")
+    return redirect(f"http://localhost:5173/?sid={estudiante_id}")
 
 # ============================================================
 # JWKS — Expone la clave publica del tool para que Moodle la valide

@@ -1,12 +1,13 @@
 import os
 from flask import Flask, send_from_directory
+from flask_cors import CORS
+from flask_session import Session
 from dotenv import load_dotenv
 from routes.estudiante import estudiante_bp
 from routes.curso import curso_bp
 from routes.interaccion import interaccion_bp
 from routes.lti import lti_bp
 from routes.gamificacion import gamificacion_bp
-
 from routes.sesion import sesion_bp
 from routes.admin import admin_bp
 
@@ -16,6 +17,36 @@ DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dist")
 
 app = Flask(__name__, static_folder=DIST_DIR, static_url_path="")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_secret_change_in_prod")
+
+# Sesión del lado del servidor con MySQL
+app.config.update(
+    SESSION_TYPE="sqlalchemy",
+    SESSION_SQLALCHEMY_TABLE="flask_sessions",
+    SESSION_PERMANENT=True,
+    SESSION_USE_SIGNER=True,
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_HTTPONLY=False,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_DOMAIN=None,
+    SESSION_COOKIE_NAME="edupath_session",
+)
+
+# Configurar SQLAlchemy para flask-session
+from flask_sqlalchemy import SQLAlchemy
+MYSQL_USER = os.getenv("MYSQL_USER", "root")
+MYSQL_PASS = os.getenv("MYSQL_PASSWORD", "")
+MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
+MYSQL_DB   = os.getenv("MYSQL_DATABASE", "edupath")
+app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_HOST}/{MYSQL_DB}"
+db_sqlalchemy = SQLAlchemy(app)
+app.config["SESSION_SQLALCHEMY"] = db_sqlalchemy
+
+Session(app)
+
+CORS(app,
+     origins=["http://localhost:5173"],
+     supports_credentials=True
+)
 
 @app.route("/")
 def index():
@@ -27,13 +58,11 @@ def spa_fallback(path):
         return {"error": "Not found"}, 404
     return send_from_directory(DIST_DIR, "index.html")
 
-
 app.register_blueprint(estudiante_bp)
 app.register_blueprint(curso_bp)
 app.register_blueprint(interaccion_bp)
 app.register_blueprint(lti_bp)
 app.register_blueprint(gamificacion_bp)
-
 app.register_blueprint(sesion_bp)
 app.register_blueprint(admin_bp)
 
