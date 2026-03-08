@@ -7,10 +7,12 @@ from routes.interaccion import interaccion_bp
 from routes.lti import lti_bp
 from routes.sesion import sesion_bp
 from routes.admin import admin_bp
+from routes.actividad import actividad_bp
 
 load_dotenv()
 
 DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dist"))
+UPLOADS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "uploads"))
 
 app = Flask(__name__, static_folder=DIST_DIR, static_url_path="")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_secret_change_in_prod")
@@ -19,9 +21,13 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_secret_change_in_prod")
 def index():
     return send_from_directory(DIST_DIR, "index.html")
 
+@app.route("/uploads/<path:filename>")
+def serve_upload(filename):
+    return send_from_directory(UPLOADS_DIR, filename)
+
 @app.route("/<path:path>")
 def spa_fallback(path):
-    if path.startswith("api/"):
+    if path.startswith("api/") or path.startswith("uploads/"):
         return {"error": "Not found"}, 404
     return send_from_directory(DIST_DIR, "index.html")
 
@@ -32,6 +38,7 @@ app.register_blueprint(interaccion_bp)
 app.register_blueprint(lti_bp)
 app.register_blueprint(sesion_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(actividad_bp)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 3000))

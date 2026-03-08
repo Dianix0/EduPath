@@ -1,7 +1,35 @@
+import os
+import re
+import urllib.request
+import urllib.parse
+import json as _json
+
 from flask import Blueprint, jsonify, request, session
 from db import execute_query, execute_command
 from utils import serialize
 import queries as q
+
+MOODLE_URL = os.getenv("MOODLE_URL", "http://192.168.5.106/moodle")
+MOODLE_TOKEN = os.getenv("MOODLE_WS_TOKEN", "")
+
+
+def _moodle_ws(wsfunction, **params):
+    qs = urllib.parse.urlencode({
+        "wstoken": MOODLE_TOKEN,
+        "wsfunction": wsfunction,
+        "moodlewsrestformat": "json",
+        **params,
+    })
+    url = f"{MOODLE_URL}/webservice/rest/server.php?{qs}"
+    with urllib.request.urlopen(url, timeout=10) as resp:
+        data = _json.loads(resp.read().decode())
+    if isinstance(data, dict) and data.get("exception"):
+        raise Exception(data.get("message", "Error Moodle WS"))
+    return data
+
+
+def _strip_html(text):
+    return re.sub(r"<[^>]+>", " ", text or "").strip()
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
@@ -83,6 +111,52 @@ def get_usuarios():
         return err
     df = execute_query(q.GET_ALL_ESTUDIANTES)
     return jsonify(serialize(df))
+
+
+@admin_bp.get("/moodle/cursos")
+def get_moodle_cursos():
+    _, err = _check_admin()
+    if err:
+        return err
+    if not MOODLE_TOKEN:
+        return jsonify({"error": "MOODLE_WS_TOKEN no configurado en .env"}), 503
+    try:
+        cursos_moodle = _moodle_ws("core_course_get_courses")
+        resultado = []
+        for c in cursos_moodle:
+            if c.get("id") == 1:  # curso raiz del sitio
+                continue
+            resultado.append({
+                "moodle_id": c["id"],
+                "titulo": c.get("fullname", ""),
+                "descripcion": _strip_html(c.get("summary", "")),
+                "categoria": c.get("categoryname", ""),
+            })
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+
+
+@admin_bp.post("/moodle/importar")
+def importar_moodle_cursos():
+    _, err = _check_admin()
+    if err:
+        return err
+    data = request.get_json()
+    cursos = data.get("cursos", [])
+    if not cursos:
+        return jsonify({"error": "No se enviaron cursos"}), 400
+    importados = 0
+    for c in cursos:
+        titulo = (c.get("titulo") or "").strip()
+        if not titulo:
+            continue
+        execute_command(
+            "INSERT INTO Curso (titulo, descripcion, categoria, duracion) VALUES (%s, %s, %s, %s)",
+            (titulo, c.get("descripcion") or None, c.get("categoria") or None, None),
+        )
+        importados += 1
+    return jsonify({"importados": importados}), 201
 
 
 @admin_bp.get("/usuarios/<int:id>/detalle")

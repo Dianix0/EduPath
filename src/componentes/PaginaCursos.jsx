@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./PaginaCursos.css";
 
 export default function PaginaCursos() {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
+  const [interacciones, setInteracciones] = useState({});
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
 
   useEffect(() => {
@@ -17,6 +20,16 @@ export default function PaginaCursos() {
           duracion: c.duracion ? `${c.duracion} minutos` : "Sin duración",
         }));
         setCourses(mapped);
+      });
+
+    fetch("/api/me/interacciones")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const map = {};
+          data.forEach((ic) => { map[ic.curso_id] = ic; });
+          setInteracciones(map);
+        }
       });
   }, []);
 
@@ -33,13 +46,36 @@ export default function PaginaCursos() {
         <p className="pagcursos-subtitulo">{cursosFiltrados.length} curso(s) disponible(s)</p>
 
         <div className="pagcursos-grid">
-          {cursosFiltrados.map((curso) => (
-            <div key={curso.id} className="pagcursos-card">
-              <h3>{curso.titulo}</h3>
-              <p className="pagcursos-desc">{curso.descripcion || "Sin descripción."}</p>
-              <span className="pagcursos-duracion">Duración: {curso.duracion}</span>
-            </div>
-          ))}
+          {cursosFiltrados.map((curso) => {
+            const ic = interacciones[curso.id];
+            const progreso = ic ? Math.round(ic.progreso ?? 0) : 0;
+            return (
+              <div key={curso.id} className="pagcursos-card">
+                <h3>{curso.titulo}</h3>
+                <p className="pagcursos-desc">{curso.descripcion || "Sin descripción."}</p>
+                <span className="pagcursos-duracion">Duración: {curso.duracion}</span>
+                <div className="pagcursos-card-footer">
+                  <button
+                    className="pagcursos-btn-entrar"
+                    onClick={() => navigate(`/cursos/${curso.id}`)}
+                  >
+                    {progreso > 0 ? "Continuar" : "Entrar"}
+                  </button>
+                  {progreso > 0 && (
+                    <div className="pagcursos-progreso-wrap">
+                      <div className="pagcursos-progreso-bar">
+                        <div
+                          className="pagcursos-progreso-fill"
+                          style={{ width: `${progreso}%` }}
+                        />
+                      </div>
+                      <span className="pagcursos-progreso-label">{progreso}%</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );

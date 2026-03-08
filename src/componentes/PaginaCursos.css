@@ -99,6 +99,10 @@
   box-shadow: 0 6px 16px rgba(255, 123, 0, 0.12);
 }
 
+.pagcursos-card-link {
+  cursor: pointer;
+}
+
 .pagcursos-card h3 {
   font-size: 1.05rem;
   font-weight: 700;
@@ -121,4 +125,55 @@
   padding: 0.3rem 0.7rem;
   border-radius: 6px;
   align-self: flex-start;
+}
+
+.pagcursos-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.pagcursos-btn-entrar {
+  background: #ff7b00;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.pagcursos-btn-entrar:hover { background: #e06900; }
+
+.pagcursos-progreso-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.pagcursos-progreso-bar {
+  flex: 1;
+  height: 6px;
+  background: #ffe2c2;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pagcursos-progreso-fill {
+  height: 100%;
+  background: #ff7b00;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.pagcursos-progreso-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ff7b00;
+  white-space: nowrap;
 }

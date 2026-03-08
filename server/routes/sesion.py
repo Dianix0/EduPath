@@ -76,6 +76,15 @@ def add_mi_interes():
     return jsonify({"message": "Interes agregado"}), 201
 
 
+@sesion_bp.get("/me/interacciones")
+def get_mis_interacciones():
+    estudiante_id = session.get("estudiante_id")
+    if not estudiante_id:
+        return jsonify({"error": "No hay sesion activa"}), 401
+    df = execute_query(q.GET_INTERACCIONES_BY_ESTUDIANTE, (estudiante_id,))
+    return jsonify(serialize(df))
+
+
 @sesion_bp.delete("/me/intereses/<string:interes>")
 def remove_mi_interes(interes):
     estudiante_id = session.get("estudiante_id")
