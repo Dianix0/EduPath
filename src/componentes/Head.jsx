@@ -11,6 +11,7 @@ function Head() {
           <li><Link to="/#inicio">Inicio</Link></li>
           <li><Link to="/#Progreso">Progreso</Link></li>
           <li><Link to="/cursos">Cursos</Link></li>
+          <li><Link to="/recomendaciones">Recomendaciones</Link></li>
           <li><Link to="/contacto">Contacto</Link></li>
           <li><Link to="/cuenta">Cuenta</Link></li>
         </ul>

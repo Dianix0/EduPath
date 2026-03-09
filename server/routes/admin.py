@@ -9,7 +9,7 @@ from db import execute_query, execute_command
 from utils import serialize
 import queries as q
 
-MOODLE_URL = os.getenv("MOODLE_URL", "http://192.168.5.106/moodle")
+MOODLE_URL = os.getenv("MOODLE_URL", "").rstrip("/")
 MOODLE_TOKEN = os.getenv("MOODLE_WS_TOKEN", "")
 
 
@@ -95,9 +95,12 @@ def delete_usuario(id):
     _, err = _check_admin()
     if err:
         return err
+    execute_command("DELETE rp FROM RespuestaPregunta rp JOIN IntentoEvaluacion ie ON rp.intento_id = ie.id WHERE ie.estudiante_id = %s", (id,))
+    execute_command("DELETE FROM IntentoEvaluacion WHERE estudiante_id = %s", (id,))
+    execute_command("DELETE FROM ProgresoActividad WHERE estudiante_id = %s", (id,))
+    execute_command("DELETE FROM InteraccionCurso WHERE estudiante_id = %s", (id,))
     execute_command("DELETE FROM EstudianteInteres WHERE estudiante_id = %s", (id,))
     execute_command("DELETE FROM EstudianteInsignia WHERE estudiante_id = %s", (id,))
-    execute_command("DELETE FROM InteraccionCurso WHERE estudiante_id = %s", (id,))
     result = execute_command(q.DELETE_ESTUDIANTE, (id,))
     if result["affected_rows"] == 0:
         return jsonify({"error": "Usuario no encontrado"}), 404

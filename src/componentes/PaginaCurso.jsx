@@ -319,6 +319,7 @@ export default function PaginaCurso() {
               <div className="pc-act-content">
                 {actividadActiva.tipo === "video" && (
                   <VisorVideo
+                    key={actividadActiva.id}
                     actividad={actividadActiva}
                     cursoId={id}
                     completado={isCompletada(actividadActiva.id)}
@@ -327,6 +328,7 @@ export default function PaginaCurso() {
                 )}
                 {actividadActiva.tipo === "diapositiva" && (
                   <VisorDiapositiva
+                    key={actividadActiva.id}
                     actividad={actividadActiva}
                     cursoId={id}
                     completado={isCompletada(actividadActiva.id)}
@@ -335,6 +337,7 @@ export default function PaginaCurso() {
                 )}
                 {actividadActiva.tipo === "evaluacion" && (
                   <VisorEvaluacion
+                    key={actividadActiva.id}
                     actividad={actividadActiva}
                     cursoId={id}
                     completado={isCompletada(actividadActiva.id)}

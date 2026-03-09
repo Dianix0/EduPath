@@ -8,6 +8,7 @@ from routes.lti import lti_bp
 from routes.sesion import sesion_bp
 from routes.admin import admin_bp
 from routes.actividad import actividad_bp
+from routes.recomendaciones import rec_bp
 
 load_dotenv()
 
@@ -39,7 +40,8 @@ app.register_blueprint(lti_bp)
 app.register_blueprint(sesion_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(actividad_bp)
+app.register_blueprint(rec_bp)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 3000))
-    app.run(debug=True, port=port)
+    app.run(debug=True, host="0.0.0.0", port=port)

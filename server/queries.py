@@ -133,6 +133,10 @@ GET_INTERACCIONES_BY_ESTUDIANTE = (
     "SELECT * FROM InteraccionCurso WHERE estudiante_id = %s"
 )
 
+GET_INTERACCIONES_CON_PROGRESO = (
+    "SELECT * FROM InteraccionCurso WHERE estudiante_id = %s AND progreso > 0"
+)
+
 GET_INTERACCIONES_BY_CURSO = (
     "SELECT * FROM InteraccionCurso WHERE curso_id = %s"
 )
@@ -333,4 +337,47 @@ ADD_INTERACCION_TIEMPO = """
 GET_INTERACCION_BY_ESTUDIANTE_CURSO = """
     SELECT * FROM InteraccionCurso
     WHERE estudiante_id = %s AND curso_id = %s
+"""
+
+
+# ============================================================
+# RECOMENDACIONES
+# ============================================================
+
+GET_ALL_CURSOS_CON_ETIQUETAS_FULL = """
+    SELECT c.id, c.titulo, c.descripcion, c.categoria, c.duracion,
+           GROUP_CONCAT(ce.etiqueta SEPARATOR '|||') AS etiquetas
+    FROM Curso c
+    LEFT JOIN CursoEtiqueta ce ON ce.curso_id = c.id
+    GROUP BY c.id, c.titulo, c.descripcion, c.categoria, c.duracion
+"""
+
+GET_ALL_USERS_FOR_COLLAB = """
+    SELECT e.id, e.carrera, e.edad,
+           GROUP_CONCAT(DISTINCT ei.interes SEPARATOR '|||') AS intereses,
+           GROUP_CONCAT(DISTINCT CASE WHEN ic.progreso > 0 THEN ic.curso_id END SEPARATOR ',') AS cursos_tomados
+    FROM Estudiante e
+    LEFT JOIN EstudianteInteres ei ON ei.estudiante_id = e.id
+    LEFT JOIN InteraccionCurso ic ON ic.estudiante_id = e.id
+    WHERE e.id != %s AND (e.rol IS NULL OR e.rol != 'Administrador')
+    GROUP BY e.id, e.carrera, e.edad
+"""
+
+GET_CURSOS_EN_PROGRESO = """
+    SELECT c.id, c.titulo, c.descripcion, c.categoria, c.duracion,
+           ic.progreso, ic.calificacion, ic.fecha_ultima_actividad
+    FROM InteraccionCurso ic
+    JOIN Curso c ON ic.curso_id = c.id
+    WHERE ic.estudiante_id = %s AND ic.progreso > 0
+    ORDER BY ic.fecha_ultima_actividad DESC
+"""
+
+GET_CURSOS_POPULARES = """
+    SELECT c.id, c.titulo, c.descripcion, c.categoria, c.duracion,
+           COUNT(ic.estudiante_id) AS num_estudiantes
+    FROM Curso c
+    LEFT JOIN InteraccionCurso ic ON ic.curso_id = c.id
+    GROUP BY c.id, c.titulo, c.descripcion, c.categoria, c.duracion
+    ORDER BY num_estudiantes DESC
+    LIMIT 6
 """

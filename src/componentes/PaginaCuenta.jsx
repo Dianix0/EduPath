@@ -208,6 +208,54 @@ function InteresesTab() {
   );
 }
 
+function MisCursosTab() {
+  const [cursos, setCursos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/me/mis-cursos")
+      .then((r) => r.json())
+      .then((data) => {
+        setCursos(Array.isArray(data) ? data : []);
+        setCargando(false);
+      })
+      .catch(() => setCargando(false));
+  }, []);
+
+  if (cargando) return <div className="cuenta-panel"><p className="cuenta-loading">Cargando...</p></div>;
+
+  return (
+    <div className="cuenta-panel">
+      <h3>Mis cursos</h3>
+      {cursos.length === 0 ? (
+        <p className="cuenta-loading">Aún no has iniciado ningún curso.</p>
+      ) : (
+        <div className="miscursos-grid">
+          {cursos.map((c) => (
+            <div key={c.id} className="miscurso-card">
+              <div className="miscurso-categoria">{c.categoria || "General"}</div>
+              <h4 className="miscurso-titulo">{c.titulo}</h4>
+              <p className="miscurso-desc">{c.descripcion}</p>
+              <div className="miscurso-barra-wrap">
+                <div className="miscurso-barra">
+                  <div
+                    className="miscurso-barra-fill"
+                    style={{ width: `${c.progreso || 0}%` }}
+                  />
+                </div>
+                <span className="miscurso-progreso">{c.progreso || 0}%</span>
+              </div>
+              {c.calificacion > 0 && (
+                <p className="miscurso-cal">Calificación: {c.calificacion}%</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PaginaCuenta() {
   const [tab, setTab] = useState("configuracion");
   const [usuario, setUsuario] = useState(null);
@@ -255,6 +303,12 @@ export default function PaginaCuenta() {
           >
             Intereses
           </button>
+          <button
+            className={tab === "miscursos" ? "activo" : ""}
+            onClick={() => setTab("miscursos")}
+          >
+            Mis cursos
+          </button>
           {usuario.rol === "Administrador" && (
             <button
               className={tab === "herramienta" ? "activo" : ""}
@@ -271,6 +325,7 @@ export default function PaginaCuenta() {
           <ConfiguracionTab usuario={usuario} onActualizado={setUsuario} />
         )}
         {tab === "intereses" && <InteresesTab />}
+        {tab === "miscursos" && <MisCursosTab />}
         {tab === "herramienta" && (
           <div className="cuenta-panel">
             <h3>Configuración de la herramienta</h3>

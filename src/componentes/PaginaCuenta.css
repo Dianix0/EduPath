@@ -1,10 +1,11 @@
 .cuenta-container {
   display: flex;
   gap: 2rem;
-  max-width: 1000px;
-  margin: 3rem auto;
-  padding: 0 2rem;
-  min-height: 60vh;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  min-height: calc(100vh - 64px - 80px);
   align-items: flex-start;
 }
 
@@ -21,21 +22,22 @@
   align-items: center;
   gap: 0.5rem;
   position: sticky;
-  top: 2rem;
+  top: 80px;
 }
 
 .cuenta-avatar {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   background-color: #ff7b00;
   color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  flex-shrink: 0;
 }
 
 .cuenta-nombre-sidebar {
@@ -47,7 +49,7 @@
 }
 
 .cuenta-email-sidebar {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #999;
   text-align: center;
   margin: 0 0 0.75rem;
@@ -69,7 +71,7 @@
   border-radius: 8px;
   padding: 0.65rem 1rem;
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #555;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
@@ -89,6 +91,7 @@
 /* === CONTENIDO PRINCIPAL === */
 .cuenta-contenido {
   flex: 1;
+  min-width: 0;
 }
 
 .cuenta-panel {
@@ -99,7 +102,7 @@
 }
 
 .cuenta-panel h3 {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #2d2d2d;
   margin-bottom: 1.5rem;
@@ -110,7 +113,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
-  max-width: 460px;
+  max-width: 480px;
 }
 
 .cuenta-field {
@@ -135,6 +138,7 @@
   transition: border-color 0.2s;
   font-family: inherit;
   background-color: #fff;
+  width: 100%;
 }
 
 .cuenta-field input:focus,
@@ -258,7 +262,6 @@
 
 .intereses-search {
   width: 100%;
-  box-sizing: border-box;
   border: 1.5px solid #ffe2c2;
   border-radius: 8px;
   padding: 0.6rem 1rem;
@@ -317,10 +320,95 @@
   font-weight: 700;
 }
 
+/* === MIS CURSOS === */
+.miscursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.miscurso-card {
+  border: 1.5px solid #ffe2c2;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #fffdf9;
+  transition: box-shadow 0.2s;
+}
+
+.miscurso-card:hover {
+  box-shadow: 0 4px 16px rgba(255, 123, 0, 0.1);
+}
+
+.miscurso-categoria {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ff7b00;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.miscurso-titulo {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d2d2d;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.miscurso-desc {
+  font-size: 0.82rem;
+  color: #777;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.miscurso-barra-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.miscurso-barra {
+  flex: 1;
+  height: 7px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.miscurso-barra-fill {
+  height: 100%;
+  background: #ff7b00;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.miscurso-progreso {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ff7b00;
+  min-width: 36px;
+  text-align: right;
+}
+
+.miscurso-cal {
+  font-size: 0.8rem;
+  color: #555;
+  margin: 0;
+}
+
 /* === RESPONSIVE === */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .cuenta-container {
     flex-direction: column;
+    padding: 1.5rem 1.25rem;
   }
 
   .cuenta-sidebar {
@@ -330,10 +418,12 @@
 
   .cuenta-nav {
     flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .cuenta-nav button {
     flex: 1;
     text-align: center;
+    min-width: 100px;
   }
 }

@@ -1,110 +1,61 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Cursos.css";
 
 export default function Cursos() {
-  const trackRef = useRef(null);
-  const catRef = useRef(null);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [courses, setCourses] = useState([]);
-  const [categorias, setCategorias] = useState([]);
+  const navigate = useNavigate();
+  const [recs, setRecs] = useState(null);
 
   useEffect(() => {
-    fetch("/api/cursos/")
-      .then((res) => res.json())
-      .then((data) => {
-        const mapped = data.map((c) => ({
-          id: c.id,
-          title: c.titulo,
-          category: c.categoria,
-          description: c.descripcion,
-          duration: c.duracion ? `${c.duracion} minutos` : null,
-        }));
-        setCourses(mapped);
-        const unicas = [...new Set(mapped.map((c) => c.category).filter(Boolean))];
-        setCategorias(unicas);
-      });
+    fetch("/api/me/recomendaciones")
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setRecs)
+      .catch(() => {});
   }, []);
 
-  const handleScroll = (dir = 1) => {
-    if (!trackRef.current) return;
-    const cardWidth = trackRef.current.querySelector("article")?.offsetWidth ?? 300;
-    const gap = 16;
-    const distance = (cardWidth + gap) * 2;
-    trackRef.current.scrollBy({ left: dir * distance, behavior: "smooth" });
-  };
+  if (!recs) return null;
 
-  const scrollCategorias = (dir = 1) => {
-    if (!catRef.current) return;
-    const catWidth = catRef.current.querySelector(".categoria-card")?.offsetWidth ?? 150;
-    const gap = 16;
-    const distance = (catWidth + gap) * 2;
-    catRef.current.scrollBy({ left: dir * distance, behavior: "smooth" });
-  };
+  const cursos = recs.hibrido?.length ? recs.hibrido : recs.populares;
+  const esHibrido = !!recs.hibrido?.length;
+
+  if (!cursos?.length) return null;
 
   return (
     <section className="cursos-section">
-      <div className="cursos-header">
-        <h2>Recomendaciones</h2>
-        <div className="cursos-buttons">
-          <button aria-label="Anterior" onClick={() => handleScroll(-1)}>‹</button>
-          <button aria-label="Siguiente" onClick={() => handleScroll(1)}>›</button>
-        </div>
+      <div className="rec-seccion-header">
+        <h2 className="cursos-main-titulo">Recomendaciones</h2>
+        <p className="rec-seccion-subtitulo">
+          {esHibrido
+            ? "Selección basada en tus intereses y comunidad"
+            : "Los cursos más tomados por la comunidad"}
+        </p>
       </div>
-
-      <div ref={trackRef} className="cursos-track">
-        {courses.map((course) => (
-          <article key={course.id} className="curso-card">
-            <div className="curso-content">
-              <h3>{course.title}</h3>
-              <p className="curso-categoria">{course.category}</p>
-              <button className="btn-view" onClick={() => setSelectedCourse(course)}>
-                Ver
+      <div className="rec-track">
+        {cursos.map((curso) => (
+          <article key={curso.id} className="rec-card">
+            <div className="rec-card-top">
+              {curso.categoria && (
+                <span className="rec-card-cat">{curso.categoria}</span>
+              )}
+              <h4 className="rec-card-titulo">{curso.titulo}</h4>
+              {curso.descripcion && (
+                <p className="rec-card-desc">{curso.descripcion}</p>
+              )}
+            </div>
+            <div className="rec-card-footer">
+              {curso.duracion && (
+                <span className="rec-card-duracion">{curso.duracion} min</span>
+              )}
+              <button
+                className="rec-card-btn"
+                onClick={() => navigate(`/cursos/${curso.id}`)}
+              >
+                Entrar
               </button>
             </div>
           </article>
         ))}
       </div>
-
-      {/* === MODAL === */}
-      {selectedCourse && (
-        <div className="modal-overlay" onClick={() => setSelectedCourse(null)}>
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()} // evita cerrar el modal al hacer clic dentro
-          >
-            <button className="modal-close" onClick={() => setSelectedCourse(null)}>
-              ×
-            </button>
-
-            <h3>{selectedCourse.title}</h3>
-            <p className="modal-categoria">{selectedCourse.category}</p>
-            <p className="modal-desc">{selectedCourse.description}</p>
-
-            <div className="modal-meta">
-              <p><strong>Duración:</strong> {selectedCourse.duration}</p>
-              <p><strong>Módulos:</strong> {selectedCourse.modules}</p>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="categorias-section">
-        <h2>Categorías</h2>
-        <div className="categorias-container">
-          <button className="cat-btn prev" onClick={() => scrollCategorias(-1)}>‹</button>
-
-          <div ref={catRef} className="categorias-track">
-            {categorias.map((cat) => (
-              <button key={cat} className="categoria-card">
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <button className="cat-btn next" onClick={() => scrollCategorias(1)}>›</button>
-        </div>
-      </div>
     </section>
   );
-
-  
 }

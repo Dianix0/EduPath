@@ -85,6 +85,15 @@ def get_mis_interacciones():
     return jsonify(serialize(df))
 
 
+@sesion_bp.get("/me/mis-cursos")
+def get_mis_cursos():
+    estudiante_id = session.get("estudiante_id")
+    if not estudiante_id:
+        return jsonify({"error": "No hay sesion activa"}), 401
+    df = execute_query(q.GET_CURSOS_EN_PROGRESO, (estudiante_id,))
+    return jsonify(serialize(df))
+
+
 @sesion_bp.delete("/me/intereses/<string:interes>")
 def remove_mi_interes(interes):
     estudiante_id = session.get("estudiante_id")
