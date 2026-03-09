@@ -1,19 +1,21 @@
 .pagcursos-container {
-  max-width: 1100px;
-  margin: 3rem auto;
-  padding: 0 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  min-height: calc(100vh - 64px - 80px);
 }
 
 .pagcursos-titulo {
-  font-size: 2rem;
+  font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 700;
   color: #2d2d2d;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .pagcursos-subtitulo {
-  color: #777;
-  font-size: 1rem;
+  color: #888;
+  font-size: 0.95rem;
   margin-bottom: 2rem;
 }
 
@@ -25,14 +27,14 @@
 /* === CATEGORIAS === */
 .pagcursos-cats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.25rem;
 }
 
 .pagcursos-cat-card {
   background-color: #fff;
   border: 2px solid #ffe2c2;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.5rem 1.25rem;
   cursor: pointer;
   text-align: left;
@@ -49,14 +51,14 @@
 }
 
 .pagcursos-cat-nombre {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #ff7b00;
 }
 
 .pagcursos-cat-count {
-  font-size: 0.85rem;
-  color: #999;
+  font-size: 0.83rem;
+  color: #aaa;
 }
 
 /* === CURSOS === */
@@ -64,12 +66,14 @@
   background: none;
   border: none;
   color: #ff7b00;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   padding: 0;
   margin-bottom: 1.5rem;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .pagcursos-back:hover {
@@ -78,47 +82,121 @@
 
 .pagcursos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
 }
 
 .pagcursos-card {
   background-color: #fff;
   border: 1px solid #ffe2c2;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .pagcursos-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(255, 123, 0, 0.12);
 }
 
 .pagcursos-card h3 {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #2d2d2d;
   margin: 0;
+  line-height: 1.35;
 }
 
 .pagcursos-desc {
-  font-size: 0.9rem;
-  color: #555;
+  font-size: 0.875rem;
+  color: #666;
   flex-grow: 1;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .pagcursos-duracion {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #ff7b00;
   font-weight: 600;
   background-color: #fff5ec;
-  padding: 0.3rem 0.7rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 6px;
   align-self: flex-start;
+}
+
+.pagcursos-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.pagcursos-btn-entrar {
+  background: #ff7b00;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.pagcursos-btn-entrar:hover {
+  background: #e06900;
+}
+
+.pagcursos-progreso-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.pagcursos-progreso-bar {
+  flex: 1;
+  height: 6px;
+  background: #ffe2c2;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pagcursos-progreso-fill {
+  height: 100%;
+  background: #ff7b00;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.pagcursos-progreso-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ff7b00;
+  white-space: nowrap;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .pagcursos-container {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .pagcursos-cats {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .pagcursos-grid {
+    grid-template-columns: 1fr;
+  }
 }

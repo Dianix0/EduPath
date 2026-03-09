@@ -133,6 +133,10 @@ GET_INTERACCIONES_BY_ESTUDIANTE = (
     "SELECT * FROM InteraccionCurso WHERE estudiante_id = %s"
 )
 
+GET_INTERACCIONES_CON_PROGRESO = (
+    "SELECT * FROM InteraccionCurso WHERE estudiante_id = %s AND progreso > 0"
+)
+
 GET_INTERACCIONES_BY_CURSO = (
     "SELECT * FROM InteraccionCurso WHERE curso_id = %s"
 )
@@ -164,4 +168,216 @@ UPDATE_INTERACCION = """
 DELETE_INTERACCION = """
     DELETE FROM InteraccionCurso
     WHERE estudiante_id = %s AND curso_id = %s
+"""
+
+
+# ============================================================
+# ACTIVIDAD
+# ============================================================
+
+GET_ACTIVIDADES_BY_CURSO = (
+    "SELECT * FROM Actividad WHERE curso_id = %s ORDER BY orden, id"
+)
+
+GET_ACTIVIDAD_BY_ID = "SELECT * FROM Actividad WHERE id = %s"
+
+INSERT_ACTIVIDAD = """
+    INSERT INTO Actividad (curso_id, titulo, descripcion, tipo, orden)
+    VALUES (%s, %s, %s, %s, %s)
+"""
+
+UPDATE_ACTIVIDAD = """
+    UPDATE Actividad SET titulo = %s, descripcion = %s, orden = %s WHERE id = %s
+"""
+
+DELETE_ACTIVIDAD = "DELETE FROM Actividad WHERE id = %s"
+
+# ---- Video ----
+
+GET_VIDEO_BY_ACTIVIDAD = "SELECT * FROM ActividadVideo WHERE actividad_id = %s"
+
+INSERT_VIDEO = "INSERT INTO ActividadVideo (actividad_id, url) VALUES (%s, %s)"
+
+UPSERT_VIDEO = """
+    INSERT INTO ActividadVideo (actividad_id, url) VALUES (%s, %s)
+    ON DUPLICATE KEY UPDATE url = %s
+"""
+
+# ---- Diapositiva ----
+
+GET_DIAPOSITIVA_BY_ACTIVIDAD = (
+    "SELECT * FROM ActividadDiapositiva WHERE actividad_id = %s"
+)
+
+INSERT_DIAPOSITIVA = """
+    INSERT INTO ActividadDiapositiva (actividad_id, nombre_archivo, nombre_original)
+    VALUES (%s, %s, %s)
+"""
+
+# ---- Evaluacion ----
+
+GET_EVALUACION_BY_ACTIVIDAD = (
+    "SELECT * FROM ActividadEvaluacion WHERE actividad_id = %s"
+)
+
+INSERT_EVALUACION = """
+    INSERT INTO ActividadEvaluacion (actividad_id, tiempo_limite_min, intentos_max)
+    VALUES (%s, %s, %s)
+"""
+
+UPDATE_EVALUACION = """
+    UPDATE ActividadEvaluacion
+    SET tiempo_limite_min = %s, intentos_max = %s
+    WHERE actividad_id = %s
+"""
+
+# ---- Preguntas ----
+
+GET_PREGUNTAS_BY_EVALUACION = (
+    "SELECT * FROM Pregunta WHERE evaluacion_id = %s ORDER BY orden, id"
+)
+
+INSERT_PREGUNTA = """
+    INSERT INTO Pregunta (evaluacion_id, enunciado, tipo, orden)
+    VALUES (%s, %s, %s, %s)
+"""
+
+UPDATE_PREGUNTA = "UPDATE Pregunta SET enunciado = %s, orden = %s WHERE id = %s"
+
+# ---- Opciones ----
+
+GET_OPCIONES_BY_PREGUNTA = "SELECT * FROM OpcionPregunta WHERE pregunta_id = %s"
+
+INSERT_OPCION = """
+    INSERT INTO OpcionPregunta (pregunta_id, texto, es_correcta) VALUES (%s, %s, %s)
+"""
+
+# ---- Progreso ----
+
+UPSERT_PROGRESO = """
+    INSERT INTO ProgresoActividad (estudiante_id, actividad_id, completado, fecha_completado)
+    VALUES (%s, %s, %s, NOW())
+    ON DUPLICATE KEY UPDATE completado = VALUES(completado), fecha_completado = NOW()
+"""
+
+GET_PROGRESO_BY_CURSO = """
+    SELECT pa.* FROM ProgresoActividad pa
+    JOIN Actividad a ON pa.actividad_id = a.id
+    WHERE pa.estudiante_id = %s AND a.curso_id = %s
+"""
+
+# ---- Intentos ----
+
+GET_INTENTOS_BY_ESTUDIANTE_ACTIVIDAD = """
+    SELECT * FROM IntentoEvaluacion
+    WHERE estudiante_id = %s AND actividad_id = %s
+    ORDER BY intento
+"""
+
+INSERT_INTENTO = """
+    INSERT INTO IntentoEvaluacion
+        (estudiante_id, actividad_id, puntos_obtenidos, total_preguntas, intento)
+    VALUES (%s, %s, %s, %s, %s)
+"""
+
+INSERT_RESPUESTA = """
+    INSERT INTO RespuestaPregunta
+        (intento_id, pregunta_id, opcion_id, texto_respuesta, es_correcta)
+    VALUES (%s, %s, %s, %s, %s)
+"""
+
+
+# ============================================================
+# INTERACCION CURSO - progreso / tiempo / calificacion
+# ============================================================
+
+COUNT_ACTIVIDADES_BY_CURSO = (
+    "SELECT COUNT(*) AS total FROM Actividad WHERE curso_id = %s"
+)
+
+COUNT_COMPLETADAS_BY_CURSO = """
+    SELECT COUNT(*) AS completadas
+    FROM ProgresoActividad pa
+    JOIN Actividad a ON pa.actividad_id = a.id
+    WHERE pa.estudiante_id = %s AND a.curso_id = %s AND pa.completado = 1
+"""
+
+GET_EVALUACIONES_IDS_BY_CURSO = """
+    SELECT ae.actividad_id
+    FROM ActividadEvaluacion ae
+    JOIN Actividad a ON ae.actividad_id = a.id
+    WHERE a.curso_id = %s
+"""
+
+GET_MEJOR_INTENTO = """
+    SELECT MAX(puntos_obtenidos) AS mejor
+    FROM IntentoEvaluacion
+    WHERE estudiante_id = %s AND actividad_id = %s
+"""
+
+UPSERT_INTERACCION_INICIO = """
+    INSERT INTO InteraccionCurso
+        (estudiante_id, curso_id, calificacion, progreso, tiempo_visualizacion, fecha_ultima_actividad)
+    VALUES (%s, %s, 0, 0, 0, NOW())
+    ON DUPLICATE KEY UPDATE fecha_ultima_actividad = fecha_ultima_actividad
+"""
+
+UPDATE_INTERACCION_PROGRESO_CAL = """
+    UPDATE InteraccionCurso
+    SET progreso = %s, calificacion = %s, fecha_ultima_actividad = NOW()
+    WHERE estudiante_id = %s AND curso_id = %s
+"""
+
+ADD_INTERACCION_TIEMPO = """
+    UPDATE InteraccionCurso
+    SET tiempo_visualizacion = tiempo_visualizacion + %s, fecha_ultima_actividad = NOW()
+    WHERE estudiante_id = %s AND curso_id = %s
+"""
+
+GET_INTERACCION_BY_ESTUDIANTE_CURSO = """
+    SELECT * FROM InteraccionCurso
+    WHERE estudiante_id = %s AND curso_id = %s
+"""
+
+
+# ============================================================
+# RECOMENDACIONES
+# ============================================================
+
+GET_ALL_CURSOS_CON_ETIQUETAS_FULL = """
+    SELECT c.id, c.titulo, c.descripcion, c.categoria, c.duracion,
+           GROUP_CONCAT(ce.etiqueta SEPARATOR '|||') AS etiquetas
+    FROM Curso c
+    LEFT JOIN CursoEtiqueta ce ON ce.curso_id = c.id
+    GROUP BY c.id, c.titulo, c.descripcion, c.categoria, c.duracion
+"""
+
+GET_ALL_USERS_FOR_COLLAB = """
+    SELECT e.id, e.carrera, e.edad,
+           GROUP_CONCAT(DISTINCT ei.interes SEPARATOR '|||') AS intereses,
+           GROUP_CONCAT(DISTINCT CASE WHEN ic.progreso > 0 THEN ic.curso_id END SEPARATOR ',') AS cursos_tomados
+    FROM Estudiante e
+    LEFT JOIN EstudianteInteres ei ON ei.estudiante_id = e.id
+    LEFT JOIN InteraccionCurso ic ON ic.estudiante_id = e.id
+    WHERE e.id != %s AND (e.rol IS NULL OR e.rol != 'Administrador')
+    GROUP BY e.id, e.carrera, e.edad
+"""
+
+GET_CURSOS_EN_PROGRESO = """
+    SELECT c.id, c.titulo, c.descripcion, c.categoria, c.duracion,
+           ic.progreso, ic.calificacion, ic.fecha_ultima_actividad
+    FROM InteraccionCurso ic
+    JOIN Curso c ON ic.curso_id = c.id
+    WHERE ic.estudiante_id = %s AND ic.progreso > 0
+    ORDER BY ic.fecha_ultima_actividad DESC
+"""
+
+GET_CURSOS_POPULARES = """
+    SELECT c.id, c.titulo, c.descripcion, c.categoria, c.duracion,
+           COUNT(ic.estudiante_id) AS num_estudiantes
+    FROM Curso c
+    LEFT JOIN InteraccionCurso ic ON ic.curso_id = c.id
+    GROUP BY c.id, c.titulo, c.descripcion, c.categoria, c.duracion
+    ORDER BY num_estudiantes DESC
+    LIMIT 6
 """
