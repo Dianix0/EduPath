@@ -61,8 +61,8 @@ const Gamificacion = () => {
       </div>
 
       <div className="cursos-stats">
-        <span>✅ Completados: <strong>{cursos_completados}</strong></span>
-        <span>📖 En progreso: <strong>{cursos_en_progreso}</strong></span>
+        <span>Completados: <strong>{cursos_completados}</strong></span>
+        <span>En progreso: <strong>{cursos_en_progreso}</strong></span>
       </div>
 
       <div className="insignas-container">
