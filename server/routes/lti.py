@@ -1,4 +1,6 @@
+from moodle_sync import sincronizar_cursos_estudiante
 import os
+import datetime
 from flask import Blueprint, jsonify, redirect, session
 from pylti1p3.contrib.flask import (
     FlaskMessageLaunch,
@@ -20,9 +22,9 @@ _SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _get_tool_conf():
-    moodle_url   = os.getenv("MOODLE_URL", "").rstrip("/")
-    client_id    = os.getenv("MOODLE_CLIENT_ID", "")
-    deployments  = [d.strip() for d in os.getenv("MOODLE_DEPLOYMENT_IDS", "1").split(",")]
+    moodle_url  = os.getenv("MOODLE_URL", "").rstrip("/")
+    client_id   = os.getenv("MOODLE_CLIENT_ID", "")
+    deployments = [d.strip() for d in os.getenv("MOODLE_DEPLOYMENT_IDS", "1").split(",")]
     conf = {
         moodle_url: [
             {
@@ -47,13 +49,12 @@ def _get_launch_data_storage():
 
 # ============================================================
 # OIDC Login — Moodle inicia aqui el flujo LTI 1.3
-# Registrar esta URL en Moodle como "Initiate login URI"
 # ============================================================
 @lti_bp.route("/oidc_login", methods=["GET", "POST"])
 @lti_bp.route("/login", methods=["GET", "POST"])
 def oidc_login():
-    tool_conf   = _get_tool_conf()
-    flask_req   = FlaskRequest()
+    tool_conf  = _get_tool_conf()
+    flask_req  = FlaskRequest()
 
     target_link_uri = flask_req.get_param("target_link_uri")
     if not target_link_uri:
@@ -69,21 +70,26 @@ def oidc_login():
 
 # ============================================================
 # Launch — Moodle redirige aqui tras autenticar al usuario
-# Registrar esta URL en Moodle como "Redirection URI"
 # ============================================================
 @lti_bp.route("/launch", methods=["POST"])
 def launch():
-    tool_conf   = _get_tool_conf()
-    flask_req   = FlaskRequest()
+    tool_conf  = _get_tool_conf()
+    flask_req  = FlaskRequest()
 
     message_launch = FlaskMessageLaunch(
         flask_req,
         tool_conf,
         launch_data_storage=_get_launch_data_storage(),
     )
+    message_launch.set_jwt_verify_options({
+        "verify_exp": True,
+        "verify_iat": False,
+        "verify_aud": False,
+        "leeway": datetime.timedelta(seconds=600),
+    })
 
     launch_data = message_launch.get_launch_data()
-
+    
     moodle_id = str(launch_data.get("sub", ""))
     nombre    = launch_data.get("name") or launch_data.get("given_name", "Sin nombre")
     email     = launch_data.get("email", "")
@@ -110,24 +116,19 @@ def launch():
         session["estudiante_id"] = estudiante["id"]
         execute_command(q.UPDATE_ESTUDIANTE_ROL, (rol, estudiante["id"]))
         print(f"LTI: estudiante existente -> {nombre} ({moodle_id}) [{rol}]")
-#<<<<<<< HEAD
-#
-#    from flask import redirect
-#    estudiante_id = session.get("estudiante_id")
-#    return redirect(f"http://localhost:5173/?sid={estudiante_id}")
-#=======
-
-#    return redirect("/")
-
-#>>>>>>> origin/develop
 
     estudiante_id = session.get("estudiante_id")
-    frontend_url = os.getenv("FRONTEND_URL", f"http://localhost:5173")
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    # Sincronizar cursos desde Moodle
+    sincronizar_cursos_estudiante(session["estudiante_id"], moodle_id)
+
+    estudiante_id = session.get("estudiante_id")
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     return redirect(f"{frontend_url}/?sid={estudiante_id}")
+
 
 # ============================================================
 # JWKS — Expone la clave publica del tool para que Moodle la valide
-# Registrar esta URL en Moodle como "Public keyset URL"
 # ============================================================
 @lti_bp.route("/jwks", methods=["GET"])
 def jwks():

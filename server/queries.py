@@ -81,6 +81,8 @@ GET_ALL_CURSOS = "SELECT * FROM Curso"
 
 GET_CURSO_BY_ID = "SELECT * FROM Curso WHERE id = %s"
 
+GET_CURSO_BY_MOODLE_ID = "SELECT * FROM Curso WHERE moodle_id = %s"
+
 INSERT_CURSO = """
     INSERT INTO Curso (titulo, descripcion, categoria, duracion)
     VALUES (%s, %s, %s, %s)
