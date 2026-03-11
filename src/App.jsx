@@ -8,6 +8,8 @@ import Contacto from './componentes/Contacto';
 import Gamificacion from './componentes/Gamificacion';
 import PaginaCursos from './componentes/PaginaCursos';
 import PaginaCuenta from './componentes/PaginaCuenta';
+import PaginaCurso from './componentes/PaginaCurso';
+import PaginaRecomendaciones from './componentes/PaginaRecomendaciones';
 import ModalCompletarPerfil from './componentes/ModalCompletarPerfil';
 import './index.css';
 
@@ -123,6 +125,8 @@ function App() {
         <Route path="/launch" element={<Navigate to="/" replace />} />
         <Route path="/contacto" element={<PaginaContacto />} />
         <Route path="/cursos" element={<PaginaCursosPage />} />
+        <Route path="/cursos/:id" element={<PaginaCurso />} />
+        <Route path="/recomendaciones" element={<><Head/><PaginaRecomendaciones/><Foot/></>} />
         <Route path="/cuenta" element={<PaginaCuentaPage />} />
       </Routes>
     </>

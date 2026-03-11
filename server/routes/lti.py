@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, jsonify, send_from_directory, session
+from flask import Blueprint, jsonify, redirect, session
 from pylti1p3.contrib.flask import (
     FlaskMessageLaunch,
     FlaskOIDCLogin,
@@ -9,21 +9,36 @@ from pylti1p3.contrib.flask import (
 from cachelib import SimpleCache as _SimpleCache
 
 _cache = _SimpleCache()
-from pylti1p3.tool_config import ToolConfJsonFile
+from pylti1p3.tool_config import ToolConfDict
 from db import execute_query, execute_command
 from utils import serialize
 import queries as q
 
 lti_bp = Blueprint("lti", __name__)
 
-# Rutas base
 _SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_DIST_DIR   = os.path.abspath(os.path.join(_SERVER_DIR, "..", "dist"))
-TOOL_CONF_PATH = os.path.join(_SERVER_DIR, "lti_config.json")
 
 
 def _get_tool_conf():
-    return ToolConfJsonFile(TOOL_CONF_PATH)
+    moodle_url   = os.getenv("MOODLE_URL", "").rstrip("/")
+    client_id    = os.getenv("MOODLE_CLIENT_ID", "")
+    deployments  = [d.strip() for d in os.getenv("MOODLE_DEPLOYMENT_IDS", "1").split(",")]
+    conf = {
+        moodle_url: [
+            {
+                "default": True,
+                "client_id": client_id,
+                "auth_login_url": f"{moodle_url}/mod/lti/auth.php",
+                "auth_token_url": f"{moodle_url}/mod/lti/token.php",
+                "key_set_url":    f"{moodle_url}/mod/lti/certs.php",
+                "key_set": None,
+                "private_key_file": os.path.join(_SERVER_DIR, "private.key"),
+                "public_key_file":  os.path.join(_SERVER_DIR, "public.key"),
+                "deployment_ids": deployments,
+            }
+        ]
+    }
+    return ToolConfDict(conf)
 
 
 def _get_launch_data_storage():
@@ -95,10 +110,20 @@ def launch():
         session["estudiante_id"] = estudiante["id"]
         execute_command(q.UPDATE_ESTUDIANTE_ROL, (rol, estudiante["id"]))
         print(f"LTI: estudiante existente -> {nombre} ({moodle_id}) [{rol}]")
+#<<<<<<< HEAD
 #
-    from flask import redirect
+#    from flask import redirect
+#    estudiante_id = session.get("estudiante_id")
+#    return redirect(f"http://localhost:5173/?sid={estudiante_id}")
+#=======
+
+#    return redirect("/")
+
+#>>>>>>> origin/develop
+
     estudiante_id = session.get("estudiante_id")
-    return redirect(f"http://localhost:5173/?sid={estudiante_id}")
+    frontend_url = os.getenv("FRONTEND_URL", f"http://localhost:5173")
+    return redirect(f"{frontend_url}/?sid={estudiante_id}")
 
 # ============================================================
 # JWKS — Expone la clave publica del tool para que Moodle la valide

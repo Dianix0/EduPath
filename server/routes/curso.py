@@ -59,6 +59,17 @@ def update(id):
 
 @curso_bp.delete("/<int:id>")
 def delete(id):
+    execute_command("DELETE rp FROM RespuestaPregunta rp JOIN IntentoEvaluacion ie ON rp.intento_id = ie.id JOIN Actividad a ON ie.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE ie FROM IntentoEvaluacion ie JOIN Actividad a ON ie.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE pa FROM ProgresoActividad pa JOIN Actividad a ON pa.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE op FROM OpcionPregunta op JOIN Pregunta p ON op.pregunta_id = p.id JOIN ActividadEvaluacion ae ON p.evaluacion_id = ae.actividad_id JOIN Actividad a ON ae.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE p FROM Pregunta p JOIN ActividadEvaluacion ae ON p.evaluacion_id = ae.actividad_id JOIN Actividad a ON ae.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE ae FROM ActividadEvaluacion ae JOIN Actividad a ON ae.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE av FROM ActividadVideo av JOIN Actividad a ON av.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE ad FROM ActividadDiapositiva ad JOIN Actividad a ON ad.actividad_id = a.id WHERE a.curso_id = %s", (id,))
+    execute_command("DELETE FROM Actividad WHERE curso_id = %s", (id,))
+    execute_command("DELETE FROM InteraccionCurso WHERE curso_id = %s", (id,))
+    execute_command("DELETE FROM CursoEtiqueta WHERE curso_id = %s", (id,))
     result = execute_command(q.DELETE_CURSO, (id,))
     if result["affected_rows"] == 0:
         return jsonify({"error": "Curso no encontrado"}), 404
@@ -74,6 +85,20 @@ def get_all_etiquetas():
     df = execute_query(q.GET_ALL_ETIQUETAS)
     etiquetas = df["etiqueta"].to_list() if not df.is_empty() else []
     return jsonify(etiquetas)
+
+
+@curso_bp.get("/con-etiquetas")
+def get_cursos_con_etiquetas():
+    df = execute_query(q.GET_CURSOS_CON_ETIQUETAS)
+    if df.is_empty():
+        return jsonify([])
+    cursos = {}
+    for row in serialize(df):
+        cid = row["id"]
+        if cid not in cursos:
+            cursos[cid] = {"id": cid, "titulo": row["titulo"], "etiquetas": []}
+        cursos[cid]["etiquetas"].append(row["etiqueta"])
+    return jsonify(list(cursos.values()))
 
 
 @curso_bp.get("/<int:id>/etiquetas")

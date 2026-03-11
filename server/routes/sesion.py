@@ -6,6 +6,12 @@ import queries as q
 sesion_bp = Blueprint("sesion", __name__, url_prefix="/api")
 
 
+@sesion_bp.get("/carreras")
+def get_carreras():
+    df = execute_query(q.GET_ALL_CARRERAS)
+    return jsonify(serialize(df))
+
+
 @sesion_bp.get("/me")
 def get_me():
     estudiante_id = session.get("estudiante_id")
@@ -68,6 +74,24 @@ def add_mi_interes():
     data = request.get_json()
     execute_command(q.INSERT_INTERES, (estudiante_id, data["interes"]))
     return jsonify({"message": "Interes agregado"}), 201
+
+
+@sesion_bp.get("/me/interacciones")
+def get_mis_interacciones():
+    estudiante_id = session.get("estudiante_id")
+    if not estudiante_id:
+        return jsonify({"error": "No hay sesion activa"}), 401
+    df = execute_query(q.GET_INTERACCIONES_BY_ESTUDIANTE, (estudiante_id,))
+    return jsonify(serialize(df))
+
+
+@sesion_bp.get("/me/mis-cursos")
+def get_mis_cursos():
+    estudiante_id = session.get("estudiante_id")
+    if not estudiante_id:
+        return jsonify({"error": "No hay sesion activa"}), 401
+    df = execute_query(q.GET_CURSOS_EN_PROGRESO, (estudiante_id,))
+    return jsonify(serialize(df))
 
 
 @sesion_bp.delete("/me/intereses/<string:interes>")
