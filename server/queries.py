@@ -398,7 +398,7 @@ GET_CURSOS_EN_PROGRESO = """
            ic.progreso, ic.calificacion, ic.fecha_ultima_actividad
     FROM InteraccionCurso ic
     JOIN Curso c ON ic.curso_id = c.id
-    WHERE ic.estudiante_id = %s AND ic.progreso > 0
+    WHERE ic.estudiante_id = %s
     ORDER BY ic.fecha_ultima_actividad DESC
 """
 

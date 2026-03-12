@@ -216,7 +216,7 @@ function MisCursosTab() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("/api/me/mis-cursos")
+    fetch("/api/me/mis-cursos", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
         setCursos(Array.isArray(data) ? data : []);
