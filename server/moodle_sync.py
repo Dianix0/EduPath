@@ -89,4 +89,25 @@ def sincronizar_cursos_estudiante(estudiante_id, moodle_user_id):
                 ))
                 sincronizados += 1
 
+    # Recalcular puntos y nivel del estudiante
+        df_est = execute_query(q.GET_ESTUDIANTE_BY_ID, (estudiante_id,))
+        if not df_est.is_empty():
+            from utils import serialize
+            estudiante = serialize(df_est)[0]
+            puntos = estudiante["puntos"] or 0
+            
+            # Recalcular nivel según puntos actuales
+            NIVELES = [
+                (0,   1, "Principiante"),
+                (100, 2, "Explorador"),
+                (250, 3, "Aprendiz"),
+                (500, 4, "Avanzado"),
+                (800, 5, "Experto"),
+            ]
+            nivel_actual = 1
+            for umbral, nivel, _ in NIVELES:
+                if puntos >= umbral:
+                    nivel_actual = nivel
+            
+            execute_command(q.UPDATE_PUNTOS_NIVEL, (puntos, nivel_actual, estudiante_id))
     print(f"Sync Moodle: {sincronizados} interacciones actualizadas para estudiante {estudiante_id}")
