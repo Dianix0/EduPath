@@ -94,6 +94,8 @@ def launch():
     nombre    = launch_data.get("name") or launch_data.get("given_name", "Sin nombre")
     email     = launch_data.get("email", "")
 
+    print(f"DEBUG LTI data: name={launch_data.get('name')} given_name={launch_data.get('given_name')} email={launch_data.get('email')}")
+
     roles_lti = launch_data.get("https://purl.imsglobal.org/spec/lti/claim/roles", [])
     if any("Administrator" in r for r in roles_lti):
         rol = "Administrador"
@@ -105,16 +107,41 @@ def launch():
     df = execute_query(q.GET_ESTUDIANTE_BY_MOODLE_ID, (moodle_id,))
 
     if df.is_empty():
+
+        # Asignar carrera por defecto (Sistemas) a nuevos estudiantes
+        df_carrera = execute_query(
+            "SELECT id FROM Carrera WHERE nombre LIKE '%Sistemas%' LIMIT 1"
+        )
+        carrera_id = df_carrera.row(0, named=True)["id"] if not df_carrera.is_empty() else None
+
         result = execute_command(
             q.INSERT_ESTUDIANTE,
-            (nombre, email, moodle_id, None, None, 0, 1, rol),
+            (nombre, email, moodle_id, None, carrera_id, 0, 1, rol),
         )
         session["estudiante_id"] = result["last_insert_id"]
         print(f"LTI: nuevo estudiante registrado -> {nombre} ({moodle_id}) [{rol}]")
     else:
         estudiante = serialize(df)[0]
         session["estudiante_id"] = estudiante["id"]
-        execute_command(q.UPDATE_ESTUDIANTE_ROL, (rol, estudiante["id"]))
+
+        # Actualizar nombre, email y rol en cada login
+        execute_command(
+            "UPDATE Estudiante SET nombre = %s, email = %s, rol = %s WHERE id = %s",
+            (nombre, email, rol, estudiante["id"])
+        )
+    
+        # Asignar carrera por defecto si no tiene
+        if not estudiante.get("carrera"):
+            df_carrera = execute_query(
+                "SELECT id FROM Carrera WHERE nombre LIKE '%Sistemas%' LIMIT 1"
+            )
+            if not df_carrera.is_empty():
+                carrera_id = df_carrera.row(0, named=True)["id"]
+                execute_command(
+                    "UPDATE Estudiante SET carrera = %s WHERE id = %s",
+                    (carrera_id, estudiante["id"])
+                )
+        
         print(f"LTI: estudiante existente -> {nombre} ({moodle_id}) [{rol}]")
 
     estudiante_id = session.get("estudiante_id")

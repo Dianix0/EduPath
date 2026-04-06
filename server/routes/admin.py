@@ -115,6 +115,26 @@ def get_usuarios():
     df = execute_query(q.GET_ALL_ESTUDIANTES)
     return jsonify(serialize(df))
 
+@admin_bp.get("/usuarios/resumen")
+def get_usuarios_resumen():
+    _, err = _check_admin()
+    if err:
+        return err
+
+    df = execute_query("""
+        SELECT 
+            e.id,
+            e.nombre,
+            e.email,
+            e.rol,
+            e.puntos,
+            MAX(ic.fecha_ultima_actividad) as ultimo_acceso
+        FROM Estudiante e
+        LEFT JOIN InteraccionCurso ic ON ic.estudiante_id = e.id
+        GROUP BY e.id
+        ORDER BY e.nombre ASC
+    """)
+    return jsonify(serialize(df))
 
 @admin_bp.get("/moodle/cursos")
 def get_moodle_cursos():
@@ -177,3 +197,20 @@ def get_usuario_detalle(id):
     estudiante["interacciones"] = serialize(execute_query(q.GET_INTERACCIONES_CON_TITULO, (id,)))
 
     return jsonify(estudiante)
+
+@admin_bp.get("/gamificacion")
+def get_gamificacion_global():
+    _, err = _check_admin()
+    if err:
+        return err
+
+    df = execute_query("""
+        SELECT e.id, e.nombre, e.email, e.puntos, e.nivel, e.rol,
+               COUNT(i.insignia) as total_insignias,
+               GROUP_CONCAT(i.insignia SEPARATOR ',') as insignias
+        FROM Estudiante e
+        LEFT JOIN EstudianteInsignia i ON i.estudiante_id = e.id
+        GROUP BY e.id
+        ORDER BY e.puntos DESC
+    """)
+    return jsonify(serialize(df))

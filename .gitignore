@@ -9,8 +9,16 @@ lerna-debug.log*
 
 node_modules
 dist
+dist/
+build/
 dist-ssr
 *.local
+
+# Claves privadas
+*.pem
+*.key
+server/private.key
+server/public.key
 
 # Editor directories and files
 .vscode/*
@@ -29,4 +37,8 @@ __pycache__/
 *.pyo
 venv/
 .env
+.env.local
+*.env
 server/.env
+back_mi/.env
+

@@ -161,4 +161,23 @@ def get_mi_gamificacion():
         "insignias": insignias,
         "cursos_completados": cursos_completados,
         "cursos_en_progreso": cursos_en_progreso,
+        "config": {
+            "niveles": [
+                {"nivel": n, "nombre": nombre, "min": umbral}
+                for umbral, n, nombre in [
+                    (0,   1, "Principiante"),
+                    (100, 2, "Explorador"),
+                    (250, 3, "Aprendiz"),
+                    (500, 4, "Avanzado"),
+                    (800, 5, "Experto"),
+                ]
+            ],
+            "insignias_info": {
+                "primer_curso":   {"nombre": "Primer Curso",    "desc": "Completaste tu primer curso"},
+                "tres_cursos":    {"nombre": "Tres Cursos",     "desc": "Completaste 3 cursos"},
+                "perfeccionista": {"nombre": "Perfeccionista",  "desc": "Calificación excelente (≥4.8)"},
+                "explorador_bd":  {"nombre": "Explorador BD",   "desc": "Completaste 2 cursos de Bases de Datos"},
+                "experto":        {"nombre": "Experto",         "desc": "Alcanzaste el nivel máximo"},
+            }
+        }
     })

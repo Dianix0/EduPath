@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./PaginaCuenta.css";
 import AdminTab from "./AdminTab";
+import MoodlePanel from "./moodle/MoodlePanel";
 
 function ConfiguracionTab({ usuario, onActualizado }) {
   const [email, setEmail] = useState(usuario.email || "");
@@ -30,9 +31,9 @@ function ConfiguracionTab({ usuario, onActualizado }) {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: email.trim(),
+        //email: email.trim(),
         edad: parseInt(edad) || null,
-        carrera: parseInt(carrera) || null,
+        //carrera: parseInt(carrera) || null,
       }),
     })
       .then((res) => res.json())
@@ -62,12 +63,11 @@ function ConfiguracionTab({ usuario, onActualizado }) {
         </div>
         <div className="cuenta-field">
           <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
-          />
+          <input type="email" value={email} disabled className="disabled" />
+        </div>
+        <div className="cuenta-field">
+          <label>Carrera</label>
+          <input value={usuario.carrera.nombre || "Sin carrera asignada"} disabled className="disabled" />
         </div>
         <div className="cuenta-field">
           <label>Edad</label>
@@ -79,15 +79,6 @@ function ConfiguracionTab({ usuario, onActualizado }) {
             onChange={(e) => setEdad(e.target.value)}
             placeholder="Ej: 21"
           />
-        </div>
-        <div className="cuenta-field">
-          <label>Carrera</label>
-          <select value={carrera} onChange={(e) => setCarrera(e.target.value)}>
-            <option value="">Selecciona tu carrera</option>
-            {carreras.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </select>
         </div>
         {mensaje && <p className="cuenta-ok">{mensaje}</p>}
         {error && <p className="cuenta-error">{error}</p>}
@@ -127,7 +118,6 @@ function InteresesTab() {
       fetch("/api/me/intereses", { credentials: 'include' }).then((r) => r.json()),
     ]).then(([cursos, intereses]) => {
       setCursosConEtiquetas(Array.isArray(cursos) ? cursos : []);
-      
       setMisIntereses(new Set(
         Array.isArray(intereses) ? intereses.map((i) => i.interes) : []
       ));
@@ -287,6 +277,12 @@ export default function PaginaCuenta() {
     return <div className="cuenta-container"><p className="cuenta-loading">Cargando...</p></div>;
   }
 
+  // Mapeo de roles de Edupath a roles del MoodlePanel
+  const rolMoodle =
+    usuario.rol === "Administrador" ? "admin" :
+    usuario.rol === "Docente"       ? "docente" :
+    "estudiante";
+
   return (
     <div className="cuenta-container">
       <aside className="cuenta-sidebar">
@@ -306,12 +302,15 @@ export default function PaginaCuenta() {
           >
             Intereses
           </button>
+          {/*
           <button
             className={tab === "miscursos" ? "activo" : ""}
             onClick={() => setTab("miscursos")}
           >
             Mis cursos
           </button>
+          */}
+          
           {usuario.rol === "Administrador" && (
             <button
               className={tab === "herramienta" ? "activo" : ""}
@@ -328,7 +327,10 @@ export default function PaginaCuenta() {
           <ConfiguracionTab usuario={usuario} onActualizado={setUsuario} />
         )}
         {tab === "intereses" && <InteresesTab />}
+        {/*}
         {tab === "miscursos" && <MisCursosTab />}
+        */}
+
         {tab === "herramienta" && (
           <div className="cuenta-panel">
             <h3>Configuración de la herramienta</h3>

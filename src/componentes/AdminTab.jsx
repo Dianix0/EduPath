@@ -857,56 +857,44 @@ function CursosAdmin() {
 // ============================================================
 function UsuariosAdmin() {
   const [usuarios, setUsuarios] = useState([]);
-  const [carreras, setCarreras] = useState({});
   const [busqueda, setBusqueda] = useState("");
-  const [seleccionado, setSeleccionado] = useState(null);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/usuarios").then((r) => r.json()).then(setUsuarios);
-    fetch("/api/carreras").then((r) => r.json()).then((lista) => {
-      const mapa = {};
-      lista.forEach((c) => { mapa[c.id] = c.nombre; });
-      setCarreras(mapa);
-    });
+    fetch("/api/admin/usuarios/resumen", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        setUsuarios(Array.isArray(data) ? data : []);
+        setCargando(false);
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+        setCargando(false);
+      });
   }, []);
 
-  const verDetalle = (id) => {
-    if (seleccionado?.id === id) { setSeleccionado(null); return; }
-    fetch(`/api/admin/usuarios/${id}/detalle`)
-      .then((r) => r.json())
-      .then(setSeleccionado);
-  };
-
-  const eliminarUsuario = (id, nombre) => {
-    if (!window.confirm(`¿Eliminar al usuario "${nombre}"? Esta acción no se puede deshacer.`)) return;
-    fetch(`/api/admin/usuarios/${id}`, { method: "DELETE" }).then(() => {
-      if (seleccionado?.id === id) setSeleccionado(null);
-      fetch("/api/admin/usuarios").then((r) => r.json()).then(setUsuarios);
-    });
-  };
-
-  const usuariosFiltrados = usuarios.filter((u) => {
+  const filtrados = usuarios.filter((u) => {
     const q = busqueda.toLowerCase();
-    const nombreCarrera = (carreras[u.carrera] || "").toLowerCase();
     return (
       u.nombre?.toLowerCase().includes(q) ||
       u.email?.toLowerCase().includes(q) ||
-      nombreCarrera.includes(q) ||
       u.rol?.toLowerCase().includes(q)
     );
   });
 
+  if (cargando) return <p className="at-muted">Cargando...</p>;
+
   return (
     <div>
       <div className="at-section-header" style={{ marginBottom: "0.75rem" }}>
-        <span className="at-muted">{usuariosFiltrados.length} de {usuarios.length} usuario(s)</span>
+        <span className="at-muted">{filtrados.length} de {usuarios.length} usuario(s)</span>
       </div>
       <input
         className="at-search"
         type="text"
         value={busqueda}
-        onChange={(e) => { setBusqueda(e.target.value); setSeleccionado(null); }}
-        placeholder="Buscar por nombre, email, carrera o rol..."
+        onChange={(e) => setBusqueda(e.target.value)}
+        placeholder="Buscar por nombre, email o rol..."
       />
       <div className="at-table-wrap">
         <table className="at-table">
@@ -914,99 +902,47 @@ function UsuariosAdmin() {
             <tr>
               <th>Nombre</th>
               <th>Email</th>
-              <th>Carrera</th>
               <th>Rol</th>
-              <th>Nivel</th>
-              <th>Puntos</th>
-              <th></th>
+              <th>Último acceso</th>
+              <th>Estado</th>
             </tr>
           </thead>
           <tbody>
-            {usuariosFiltrados.map((u) => (
-              <React.Fragment key={u.id}>
-                <tr className={seleccionado?.id === u.id ? "at-row-active" : ""}>
-                  <td>{u.nombre}</td>
-                  <td>{u.email || "—"}</td>
-                  <td>{carreras[u.carrera] || "—"}</td>
+            {filtrados.map((u) => {
+              const activo = u.puntos > 0;
+              return (
+                <tr key={u.id}>
+                  <td style={{ fontWeight: activo ? 600 : 400, color: activo ? "#2d2d2d" : "#9ca3af" }}>
+                    {u.nombre}
+                  </td>
+                  <td style={{ color: activo ? "#2d2d2d" : "#9ca3af" }}>
+                    {u.email || "—"}
+                  </td>
                   <td>
-                    <span className={`at-rol-badge at-rol-${(u.rol || "").toLowerCase()}`}>
-                      {u.rol || "—"}
+                    {u.rol
+                      ? <span className={`at-rol-badge at-rol-${u.rol.toLowerCase()}`}>{u.rol}</span>
+                      : <span style={{ color: "#9ca3af" }}>—</span>
+                    }
+                  </td>
+                  <td style={{ color: activo ? "#2d2d2d" : "#9ca3af", fontSize: "13px" }}>
+                    {u.ultimo_acceso || "Sin actividad"}
+                  </td>
+                  <td>
+                    <span style={{
+                      display: "inline-block",
+                      padding: "2px 10px",
+                      borderRadius: "99px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      background: activo ? "#dcfce7" : "#f3f4f6",
+                      color: activo ? "#16a34a" : "#9ca3af",
+                    }}>
+                      {activo ? "Activo" : "Inactivo"}
                     </span>
                   </td>
-                  <td>{u.nivel}</td>
-                  <td>{u.puntos}</td>
-                  <td style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-                    <button
-                      className="at-btn-ver"
-                      onClick={() => verDetalle(u.id)}
-                      title="Ver detalle"
-                    >
-                      {seleccionado?.id === u.id ? "▲" : "▼"}
-                    </button>
-                    <button
-                      className="at-btn-delete"
-                      onClick={() => eliminarUsuario(u.id, u.nombre)}
-                      title="Eliminar usuario"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
                 </tr>
-
-                {seleccionado?.id === u.id && (
-                  <tr className="at-detalle-row">
-                    <td colSpan={7}>
-                      <div className="at-detalle">
-                        <div className="at-detalle-intereses">
-                          <strong>Intereses:</strong>{" "}
-                          {seleccionado.intereses.length === 0 ? (
-                            <span className="at-muted">Sin intereses registrados</span>
-                          ) : (
-                            seleccionado.intereses.map((i) => (
-                              <span key={i.interes} className="at-tag-readonly">{i.interes}</span>
-                            ))
-                          )}
-                        </div>
-                        <div className="at-detalle-interacciones">
-                          <strong>Interacciones con cursos:</strong>
-                          {seleccionado.interacciones.length === 0 ? (
-                            <span className="at-muted"> Sin interacciones</span>
-                          ) : (
-                            <table className="at-inner-table">
-                              <thead>
-                                <tr>
-                                  <th>Curso</th>
-                                  <th>Progreso</th>
-                                  <th>Calificación</th>
-                                  <th>Última actividad</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {seleccionado.interacciones.map((i) => (
-                                  <tr key={i.curso_id}>
-                                    <td>{i.curso_titulo}</td>
-                                    <td>
-                                      {i.progreso != null ? (
-                                        <div className="at-progreso-wrap">
-                                          <div className="at-progreso-bar" style={{ width: `${i.progreso}%` }} />
-                                          <span>{i.progreso}%</span>
-                                        </div>
-                                      ) : "—"}
-                                    </td>
-                                    <td>{i.calificacion ?? "—"}</td>
-                                    <td>{i.fecha_ultima_actividad || "—"}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -1084,6 +1020,108 @@ function CarrerasAdmin() {
   );
 }
 
+export function GamificacionAdmin() {
+  const [datos, setDatos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/gamificacion", { credentials: "include" })
+      .then(r => r.json())
+      .then(data => { setDatos(Array.isArray(data) ? data : []); setCargando(false); });
+  }, []);
+
+  const NIVELES = { 1: "Principiante", 2: "Explorador", 3: "Aprendiz", 4: "Avanzado", 5: "Experto" };
+  const NARANJA = "#ff7b00";
+  const NARANJA_PALE = "#fff4eb";
+  const BORDER = "#ffe2c2";
+
+  // Resumen
+  const totalUsuarios   = datos.length;
+  const porNivel        = datos.reduce((acc, u) => { acc[u.nivel] = (acc[u.nivel] || 0) + 1; return acc; }, {});
+  const totalInsignias  = datos.reduce((s, u) => s + (u.total_insignias || 0), 0);
+  const promedioInsg    = totalUsuarios > 0 ? (totalInsignias / totalUsuarios).toFixed(1) : 0;
+  const conActividad    = datos.filter(u => u.puntos > 0).length;
+
+  if (cargando) return <p className="at-muted">Cargando...</p>;
+
+  return (
+    <div>
+      {/* Resumen */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { label: 'Usuarios activos', value: `${conActividad} / ${totalUsuarios}` },
+          { label: 'Insignias otorgadas', value: totalInsignias },
+          { label: 'Insignias por usuario', value: promedioInsg },
+        ].map(s => (
+          <div key={s.label} style={{
+            background: NARANJA_PALE, borderRadius: '10px', padding: '14px 18px',
+            border: `1px solid ${BORDER}`,
+          }}>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: NARANJA }}>{s.value}</div>
+            <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Distribución por nivel */}
+      <div style={{ background: '#fff4eb', borderRadius: '10px', padding: '16px 18px', border: '1px solid #ffe2c2', marginBottom: '24px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>
+          Distribución por nivel
+        </div>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {[1,2,3,4,5].map(n => (
+            <div key={n} style={{
+              padding: '6px 14px', borderRadius: '99px', fontSize: '12px', fontWeight: 600,
+              background: porNivel[n] ? NARANJA : '#f3f4f6',
+              color: porNivel[n] ? 'white' : '#9ca3af',
+            }}>
+              {NIVELES[n]}: {porNivel[n] || 0}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabla detallada */}
+      <div style={{ background: 'white', borderRadius: '10px', border: '1px solid #ffe2c2', overflow: 'hidden' }}>
+        <table className="at-table" style={{ width: '100%' }}>
+          <thead>
+            <tr style={{ background: '#fff4eb', borderBottom: '2px solid #ffe2c2' }}>
+              {['Usuario', 'Rol', 'Nivel', 'Puntos', 'Insignias'].map(h => (
+                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: NARANJA, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {datos.map((u, i) => (
+              <tr key={u.id} style={{ borderBottom: '1px solid #f9fafb', background: i % 2 === 0 ? 'white' : '#fafafa' }}>
+                <td style={{ padding: '10px 14px', fontSize: '13px', fontWeight: 600, color: '#2d2d2d' }}>
+                  {u.nombre}
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  <span className={`at-rol-badge at-rol-${(u.rol || "").toLowerCase()}`}>
+                    {u.rol || "—"}
+                  </span>
+                </td>
+                <td style={{ padding: '10px 14px', fontSize: '13px', color: u.puntos > 0 ? NARANJA : '#9ca3af', fontWeight: 600 }}>
+                  {NIVELES[u.nivel] || 'Principiante'}
+                </td>
+                <td style={{ padding: '10px 14px', fontSize: '13px', fontWeight: 700, color: u.puntos > 0 ? '#2d2d2d' : '#9ca3af' }}>
+                  {u.puntos || 0} pts
+                </td>
+                <td style={{ padding: '10px 14px', fontSize: '13px', color: '#6b7280' }}>
+                  {u.total_insignias || 0}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ============================================================
 // ADMIN TAB PRINCIPAL
 // ============================================================
@@ -1093,29 +1131,27 @@ export default function AdminTab() {
   return (
     <div className="at-container">
       <div className="at-subtabs">
-        <button
-          className={subTab === "cursos" ? "activo" : ""}
-          onClick={() => setSubTab("cursos")}
-        >
+        <button className={subTab === "cursos" ? "activo" : ""} onClick={() => setSubTab("cursos")}>
           Cursos
         </button>
-        <button
-          className={subTab === "usuarios" ? "activo" : ""}
-          onClick={() => setSubTab("usuarios")}
-        >
-          Usuarios
-        </button>
-        <button
-          className={subTab === "carreras" ? "activo" : ""}
-          onClick={() => setSubTab("carreras")}
-        >
+        {/* Usuarios (comentado originalmente) — reemplazado por pestaña Usuarios nueva */}
+        {/* <button className={subTab === "usuarios_old" ? "activo" : ""} onClick={() => setSubTab("usuarios_old")}>
+          Usuarios (original)
+        </button> */}
+        <button className={subTab === "carreras" ? "activo" : ""} onClick={() => setSubTab("carreras")}>
           Carreras
+        </button>
+        {/* Gamificación renombrada a Usuarios */}
+        <button className={subTab === "usuarios" ? "activo" : ""} onClick={() => setSubTab("usuarios")}>
+          Usuarios
         </button>
       </div>
       <div className="at-content">
         {subTab === "cursos" && <CursosAdmin />}
-        {subTab === "usuarios" && <UsuariosAdmin />}
         {subTab === "carreras" && <CarrerasAdmin />}
+        {subTab === "usuarios" && <UsuariosAdmin />}
+        {/* GamificacionAdmin queda disponible para Progreso > Usuarios */}
+        {/* {subTab === "gamificacion" && <GamificacionAdmin />} */}
       </div>
     </div>
   );

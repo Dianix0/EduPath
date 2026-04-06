@@ -5,14 +5,12 @@ import queries as q
 
 gamificacion_bp = Blueprint("gamificacion", __name__, url_prefix="/api/gamificacion")
 
-# ============================================================
-# Constantes de reglas de negocio (fáciles de ajustar)
-# ============================================================
+# Constantes de reglas de negocio
 PUNTOS_PRIMERA_INTERACCION = 10
 PUNTOS_MITAD_PROGRESO = 25
 PUNTOS_CURSO_COMPLETO = 75
 PUNTOS_BONUS_CALIFICACION = 20
-CALIFICACION_BONUS = 4.5
+CALIFICACION_BONUS = 4.8
 
 NIVELES = [
     (0,   1, "Principiante"),
@@ -23,11 +21,11 @@ NIVELES = [
 ]
 
 INSIGNIAS = {
-    "primer_curso":    "Completaste tu primer curso 🥇",
-    "tres_cursos":     "Completaste 3 cursos 🔥",
-    "perfeccionista":  "Obtuviste una calificación >= 4.8 🎯",
-    "explorador_bd":   "Completaste 2 cursos de Bases de Datos 1 📚",
-    "experto":         "Alcanzaste el nivel 5 🏆",
+    "primer_curso":    "¡Completaste tu primer curso!",
+    "tres_cursos":     "¡Completaste 3 cursos!",
+    "perfeccionista":  "¡Obtuviste una calificación excelente!",
+    "explorador_bd":   "¡Completaste 2 cursos de Bases de Datos!",
+    "experto":         "¡Alcanzaste el nivel 5!",
 }
 
 # ============================================================
@@ -73,6 +71,7 @@ def _calcular_puntos_interaccion(progreso: float, calificacion: float, es_nueva:
 
 
 def _verificar_insignias(estudiante_id: int, calificacion: float, nivel: int) -> list:
+    print(f"DEBUG insignias — estudiante_id={estudiante_id}, calificacion={calificacion}, nivel={nivel}")
     insignias_ganadas = []
 
     # Insignias actuales
