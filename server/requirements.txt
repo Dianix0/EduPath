@@ -1,6 +1,12 @@
 flask
+flask-session
+flask-sqlalchemy
 flask-caching
+flask-cors
 pylti1p3[flask]
 mysql-connector-python
 polars
 python-dotenv
+gunicorn
+cachelib
+requests

@@ -144,14 +144,10 @@ def launch():
         
         print(f"LTI: estudiante existente -> {nombre} ({moodle_id}) [{rol}]")
 
-    estudiante_id = session.get("estudiante_id")
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     # Sincronizar cursos desde Moodle
     sincronizar_cursos_estudiante(session["estudiante_id"], moodle_id)
 
-    estudiante_id = session.get("estudiante_id")
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    return redirect(f"{frontend_url}/?sid={estudiante_id}")
+    return redirect("/")
 
 
 # ============================================================
