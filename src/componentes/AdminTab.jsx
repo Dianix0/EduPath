@@ -1135,6 +1135,237 @@ export function GamificacionAdmin() {
 }
 
 // ============================================================
+// BASE DE DATOS VIEWER
+// ============================================================
+function BaseDatosAdmin() {
+  const [tablas, setTablas] = useState([]);
+  const [tablaActiva, setTablaActiva] = useState(null);
+  const [datos, setDatos] = useState(null);
+  const [page, setPage] = useState(1);
+  const [cargando, setCargando] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/db/tablas", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => { setTablas(Array.isArray(d) ? d : []); });
+  }, []);
+
+  const cargarTabla = (tabla, p = 1) => {
+    setTablaActiva(tabla);
+    setPage(p);
+    setCargando(true);
+    fetch(`/api/admin/db/tablas/${tabla}?page=${p}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => { setDatos(d); setCargando(false); })
+      .catch(() => setCargando(false));
+  };
+
+  const totalPaginas = datos ? Math.ceil(datos.total / datos.per_page) : 0;
+  const columnas = datos?.filas?.length > 0 ? Object.keys(datos.filas[0]) : [];
+
+  return (
+    <div style={{ display: "flex", gap: "1.5rem", minHeight: "400px" }}>
+      {/* Sidebar de tablas */}
+      <div style={{ width: "180px", flexShrink: 0, borderRight: "1px solid #e5e7eb", paddingRight: "1rem" }}>
+        <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "0.5rem", fontWeight: 600, textTransform: "uppercase" }}>Tablas</p>
+        {tablas.map((t) => (
+          <button
+            key={t}
+            onClick={() => cargarTabla(t, 1)}
+            style={{
+              display: "block", width: "100%", textAlign: "left",
+              padding: "6px 10px", borderRadius: "6px", border: "none",
+              cursor: "pointer", fontSize: "13px", marginBottom: "2px",
+              background: tablaActiva === t ? "#fff7ed" : "transparent",
+              color: tablaActiva === t ? "#f97316" : "#374151",
+              fontWeight: tablaActiva === t ? 600 : 400,
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* Contenido */}
+      <div style={{ flex: 1, overflow: "auto" }}>
+        {!tablaActiva && <p className="at-muted">Selecciona una tabla para ver sus datos.</p>}
+        {cargando && <p className="at-muted">Cargando...</p>}
+        {!cargando && datos && (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <span style={{ fontSize: "13px", color: "#6b7280" }}>
+                {datos.total} registros · página {page} de {totalPaginas || 1}
+              </span>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button className="at-btn-secondary" disabled={page <= 1} onClick={() => cargarTabla(tablaActiva, page - 1)}>← Anterior</button>
+                <button className="at-btn-secondary" disabled={page >= totalPaginas} onClick={() => cargarTabla(tablaActiva, page + 1)}>Siguiente →</button>
+              </div>
+            </div>
+            {datos.filas.length === 0 ? (
+              <p className="at-muted">La tabla está vacía.</p>
+            ) : (
+              <div className="at-table-wrap">
+                <table className="at-table">
+                  <thead>
+                    <tr>{columnas.map((c) => <th key={c}>{c}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {datos.filas.map((fila, i) => (
+                      <tr key={i}>
+                        {columnas.map((c) => (
+                          <td key={c} style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {fila[c] === null ? <span style={{ color: "#d1d5db" }}>NULL</span> : String(fila[c])}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// METRICAS
+// ============================================================
+function MetricasAdmin() {
+  const [datos, setDatos] = useState(null);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/metricas", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => { setDatos(d); setCargando(false); })
+      .catch(() => setCargando(false));
+  }, []);
+
+  if (cargando) return <p className="at-muted">Cargando métricas...</p>;
+  if (!datos) return <p className="at-muted">Error al cargar métricas.</p>;
+
+  const { resumen, completacion_por_curso, abandonados, retencion, cursos_por_usuario, match_interes } = datos;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+
+      {/* Tarjetas resumen */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "1rem" }}>
+        {[
+          { label: "Usuarios", value: resumen.total_usuarios ?? 0 },
+          { label: "Cursos", value: resumen.total_cursos ?? 0 },
+          { label: "Interacciones activas", value: resumen.interacciones_activas ?? 0 },
+          { label: "Completaciones", value: resumen.completaciones ?? 0 },
+          { label: "Tasa de completación", value: `${resumen.tasa_completacion ?? 0}%` },
+          { label: "Activos (7d)", value: retencion.activos_7d ?? 0 },
+          { label: "Activos (30d)", value: retencion.activos_30d ?? 0 },
+        ].map((t) => (
+          <div key={t.label} style={{ background: "#f9fafb", borderRadius: "12px", padding: "1rem", textAlign: "center", border: "1px solid #e5e7eb" }}>
+            <div style={{ fontSize: "1.8rem", fontWeight: 700, color: "#f97316" }}>{t.value}</div>
+            <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>{t.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Completación por curso */}
+      <div>
+        <h3 style={{ marginBottom: "0.75rem", fontSize: "15px", fontWeight: 600 }}>Progreso por curso</h3>
+        {completacion_por_curso.length === 0 ? <p className="at-muted">Sin datos aún.</p> : (
+          <div className="at-table-wrap">
+            <table className="at-table">
+              <thead><tr><th>Curso</th><th>Usuarios</th><th>Completados</th><th>En progreso</th><th>Progreso prom.</th><th>Tiempo prom. (min)</th></tr></thead>
+              <tbody>
+                {completacion_por_curso.map((c, i) => (
+                  <tr key={i}>
+                    <td>{c.titulo}</td>
+                    <td>{c.total_usuarios}</td>
+                    <td style={{ color: "#16a34a", fontWeight: 600 }}>{c.completados}</td>
+                    <td style={{ color: "#d97706", fontWeight: 600 }}>{c.en_progreso}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ flex: 1, background: "#e5e7eb", borderRadius: "99px", height: "6px" }}>
+                          <div style={{ width: `${c.progreso_promedio}%`, background: "#f97316", borderRadius: "99px", height: "6px" }} />
+                        </div>
+                        <span style={{ fontSize: "12px", minWidth: "36px" }}>{c.progreso_promedio}%</span>
+                      </div>
+                    </td>
+                    <td>{c.tiempo_promedio_min ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Cursos abandonados */}
+      <div>
+        <h3 style={{ marginBottom: "0.75rem", fontSize: "15px", fontWeight: 600 }}>Cursos abandonados (sin actividad +14 días)</h3>
+        {abandonados.length === 0 ? <p className="at-muted">Sin cursos abandonados.</p> : (
+          <div className="at-table-wrap">
+            <table className="at-table">
+              <thead><tr><th>Curso</th><th>Usuarios que abandonaron</th></tr></thead>
+              <tbody>
+                {abandonados.map((a, i) => (
+                  <tr key={i}>
+                    <td>{a.titulo}</td>
+                    <td style={{ color: "#dc2626", fontWeight: 600 }}>{a.usuarios_abandonaron}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Cursos por usuario */}
+      <div>
+        <h3 style={{ marginBottom: "0.75rem", fontSize: "15px", fontWeight: 600 }}>Actividad por usuario</h3>
+        {cursos_por_usuario.length === 0 ? <p className="at-muted">Sin datos aún.</p> : (
+          <div className="at-table-wrap">
+            <table className="at-table">
+              <thead><tr><th>Usuario</th><th>Cursos iniciados</th><th>Cursos completados</th></tr></thead>
+              <tbody>
+                {cursos_por_usuario.map((u, i) => (
+                  <tr key={i}>
+                    <td>{u.nombre}</td>
+                    <td>{u.cursos_iniciados}</td>
+                    <td style={{ color: "#16a34a", fontWeight: 600 }}>{u.cursos_completados}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Match interés-acción */}
+      <div>
+        <h3 style={{ marginBottom: "0.75rem", fontSize: "15px", fontWeight: 600 }}>Match interés → acción</h3>
+        {match_interes.length === 0 ? <p className="at-muted">Sin intereses declarados aún.</p> : (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+            {match_interes.map((m, i) => (
+              <div key={i} style={{
+                padding: "6px 14px", borderRadius: "99px", fontSize: "13px",
+                background: m.cursos_tomados_con_etiqueta > 0 ? "#dcfce7" : "#f3f4f6",
+                color: m.cursos_tomados_con_etiqueta > 0 ? "#16a34a" : "#9ca3af",
+                border: `1px solid ${m.cursos_tomados_con_etiqueta > 0 ? "#bbf7d0" : "#e5e7eb"}`,
+              }}>
+                {m.interes} <strong>({m.cursos_tomados_con_etiqueta})</strong>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
+  );
+}
+
+// ============================================================
 // ADMIN TAB PRINCIPAL
 // ============================================================
 export default function AdminTab() {
@@ -1157,11 +1388,19 @@ export default function AdminTab() {
         <button className={subTab === "usuarios" ? "activo" : ""} onClick={() => setSubTab("usuarios")}>
           Usuarios
         </button>
+        <button className={subTab === "metricas" ? "activo" : ""} onClick={() => setSubTab("metricas")}>
+          Métricas
+        </button>
+        <button className={subTab === "basedatos" ? "activo" : ""} onClick={() => setSubTab("basedatos")}>
+          Base de datos
+        </button>
       </div>
       <div className="at-content">
         {subTab === "cursos" && <CursosAdmin />}
         {subTab === "carreras" && <CarrerasAdmin />}
         {subTab === "usuarios" && <UsuariosAdmin />}
+        {subTab === "metricas" && <MetricasAdmin />}
+        {subTab === "basedatos" && <BaseDatosAdmin />}
         {/* GamificacionAdmin queda disponible para Progreso > Usuarios */}
         {/* {subTab === "gamificacion" && <GamificacionAdmin />} */}
       </div>
