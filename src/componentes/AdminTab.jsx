@@ -873,6 +873,14 @@ function UsuariosAdmin() {
       });
   }, []);
 
+  const eliminar = (id, nombre) => {
+    if (!window.confirm(`¿Eliminar al usuario "${nombre}"? Esta acción no se puede deshacer.`)) return;
+    fetch(`/api/admin/usuarios/${id}`, { method: "DELETE", credentials: "include" })
+      .then((r) => r.json())
+      .then(() => setUsuarios((prev) => prev.filter((u) => u.id !== id)))
+      .catch((err) => console.error("Error al eliminar:", err));
+  };
+
   const filtrados = usuarios.filter((u) => {
     const q = busqueda.toLowerCase();
     return (
@@ -905,6 +913,7 @@ function UsuariosAdmin() {
               <th>Rol</th>
               <th>Último acceso</th>
               <th>Estado</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -939,6 +948,9 @@ function UsuariosAdmin() {
                     }}>
                       {activo ? "Activo" : "Inactivo"}
                     </span>
+                  </td>
+                  <td>
+                    <button className="at-btn-delete" onClick={() => eliminar(u.id, u.nombre)}>Eliminar</button>
                   </td>
                 </tr>
               );

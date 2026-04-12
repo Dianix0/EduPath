@@ -21,10 +21,10 @@ UPLOADS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "uploads")
 app = Flask(__name__, static_folder=DIST_DIR, static_url_path="")
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_secret_change_in_prod")
 
-# Sesión del lado del servidor con MySQL
+# Sesión del lado del servidor con filesystem
 app.config.update(
-    SESSION_TYPE="sqlalchemy",
-    SESSION_SQLALCHEMY_TABLE="flask_sessions",
+    SESSION_TYPE="filesystem",
+    SESSION_FILE_DIR="/tmp/flask_sessions",
     SESSION_PERMANENT=True,
     SESSION_USE_SIGNER=True,
     SESSION_COOKIE_SECURE=False,
@@ -33,16 +33,6 @@ app.config.update(
     SESSION_COOKIE_DOMAIN=None,
     SESSION_COOKIE_NAME="edupath_session",
 )
-
-# Configurar SQLAlchemy para flask-session
-from flask_sqlalchemy import SQLAlchemy
-MYSQL_USER = os.getenv("MYSQL_USER", "root")
-MYSQL_PASS = os.getenv("MYSQL_PASSWORD", "")
-MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
-MYSQL_DB   = os.getenv("MYSQL_DATABASE", "edupath")
-app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_HOST}/{MYSQL_DB}"
-db_sqlalchemy = SQLAlchemy(app)
-app.config["SESSION_SQLALCHEMY"] = db_sqlalchemy
 
 Session(app)
 

@@ -8,9 +8,9 @@ from pylti1p3.contrib.flask import (
     FlaskRequest,
     FlaskCacheDataStorage,
 )
-from cachelib import SimpleCache as _SimpleCache
+from cachelib import FileSystemCache as _FileSystemCache
 
-_cache = _SimpleCache()
+_cache = _FileSystemCache("/tmp/lti_cache")
 from pylti1p3.tool_config import ToolConfDict
 from db import execute_query, execute_command
 from utils import serialize

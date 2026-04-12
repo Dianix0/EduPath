@@ -3,6 +3,7 @@ services:
   db:
     image: mysql:8
     restart: always
+    command: --lower-case-table-names=1
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: edupath
@@ -39,7 +40,7 @@ services:
       MYSQL_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: edupath
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
-      MOODLE_URL: https://moodle.edupath.space
+      MOODLE_URL: ${MOODLE_URL}
       MOODLE_CLIENT_ID: ${MOODLE_CLIENT_ID}
       MOODLE_DEPLOYMENT_IDS: ${MOODLE_DEPLOYMENT_IDS}
       MOODLE_WS_TOKEN: ${MOODLE_WS_TOKEN}

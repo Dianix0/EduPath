@@ -120,7 +120,7 @@ function App() {
         .then(data => {
             if (!data.error) {
                 setUsuario(data)
-                if (!data.edad || !data.carrera) {
+                if ((!data.edad || !data.carrera) && data.rol !== "Administrador") {
                     setPerfilPendiente(true)
                 }
             }
@@ -137,7 +137,7 @@ function App() {
         .then((data) => {
             if (!data) return
             setUsuario(data)
-            if (!data.edad || !data.carrera) {
+            if ((!data.edad || !data.carrera) && data.rol !== "Administrador") {
                 setPerfilPendiente(true)
             }
         })

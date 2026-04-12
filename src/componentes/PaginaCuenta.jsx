@@ -67,7 +67,7 @@ function ConfiguracionTab({ usuario, onActualizado }) {
         </div>
         <div className="cuenta-field">
           <label>Carrera</label>
-          <input value={usuario.carrera.nombre || "Sin carrera asignada"} disabled className="disabled" />
+          <input value={usuario.carrera?.nombre || "Sin carrera asignada"} disabled className="disabled" />
         </div>
         <div className="cuenta-field">
           <label>Edad</label>
