@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import * as XLSX from "xlsx";
 import "./AdminTab.css";
 
 // ============================================================
@@ -628,6 +629,67 @@ function CursosAdmin() {
     fetch(`/api/cursos/${id}`, { method: "DELETE" }).then(cargarCursos);
   };
 
+  const eliminarTodos = async () => {
+    if (!window.confirm(`¿Eliminar TODOS los ${cursos.length} cursos? Esta acción no se puede deshacer.`)) return;
+    for (const c of cursos) {
+      await fetch(`/api/cursos/${c.id}`, { method: "DELETE", credentials: "include" });
+    }
+    cargarCursos();
+  };
+
+  const importarExcel = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const wb = XLSX.read(ev.target.result, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const filas = XLSX.utils.sheet_to_json(ws, { defval: "" });
+
+      let importados = 0;
+      for (const fila of filas) {
+        const titulo = (fila["Nombre"] || "").trim();
+        if (!titulo) continue;
+
+        const descripcion = (fila["Descripción del Microcurso"] || "").trim();
+        const categoria = (fila["Categoría Específica"] || fila["Categoría Especifica"] || "").trim();
+
+        // Extraer duración: busca "Duración: ~XX min" y saca solo el número
+        const detalles = fila["Detalles del Microcurso"] || "";
+        const matchDur = String(detalles).match(/Duraci[oó]n[:\s~]*(\d+)/i);
+        const duracion = matchDur ? parseInt(matchDur[1]) : null;
+
+        // Etiquetas separadas por coma
+        const etiquetasRaw = (fila["Etiquetas"] || "").toString();
+        const etiquetas = etiquetasRaw.split(",").map((t) => t.trim()).filter(Boolean);
+
+        // Crear curso
+        const res = await fetch("/api/cursos/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ titulo, descripcion, categoria, duracion }),
+        });
+        const data = await res.json();
+
+        // Agregar etiquetas
+        for (const etiqueta of etiquetas) {
+          await fetch(`/api/cursos/${data.id}/etiquetas`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ etiqueta }),
+          });
+        }
+        importados++;
+      }
+      alert(`Se importaron ${importados} cursos correctamente.`);
+      cargarCursos();
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = ""; // reset input
+  };
+
   const agregarEtiqueta = () => {
     const tag = (modoNueva ? nuevaEtiqueta : etiquetaSeleccionada).trim();
     if (!tag || etiquetasEdit.includes(tag)) return;
@@ -814,6 +876,13 @@ function CursosAdmin() {
       <div className="at-section-header">
         <span>{cursosFiltrados.length} de {cursos.length} curso(s)</span>
         <div className="at-section-header-actions">
+          <button className="at-btn-delete" onClick={eliminarTodos} disabled={cursos.length === 0}>
+            Eliminar todos
+          </button>
+          <label className="at-btn-secondary" style={{ cursor: "pointer" }}>
+            Importar Excel
+            <input type="file" accept=".xlsx,.xls" style={{ display: "none" }} onChange={importarExcel} />
+          </label>
           <button className="at-btn-secondary" onClick={() => setMoodleModal(true)}>
             Importar desde Moodle
           </button>

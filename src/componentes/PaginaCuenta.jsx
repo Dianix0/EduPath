@@ -107,17 +107,17 @@ function ConfiguracionTab({ usuario, onActualizado }) {
 }
 
 function InteresesTab() {
-  const [cursosConEtiquetas, setCursosConEtiquetas] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [misIntereses, setMisIntereses] = useState(new Set());
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/cursos/con-etiquetas", { credentials: 'include' }).then((r) => r.json()),
+      fetch("/api/cursos/etiquetas-por-categoria", { credentials: 'include' }).then((r) => r.json()),
       fetch("/api/me/intereses", { credentials: 'include' }).then((r) => r.json()),
-    ]).then(([cursos, intereses]) => {
-      setCursosConEtiquetas(Array.isArray(cursos) ? cursos : []);
+    ]).then(([cats, intereses]) => {
+      setCategorias(Array.isArray(cats) ? cats : []);
       setMisIntereses(new Set(
         Array.isArray(intereses) ? intereses.map((i) => i.interes) : []
       ));
@@ -131,11 +131,7 @@ function InteresesTab() {
         method: "DELETE",
         credentials: 'include',
       }).then(() => {
-        setMisIntereses((prev) => {
-          const s = new Set(prev);
-          s.delete(etiqueta);
-          return s;
-        });
+        setMisIntereses((prev) => { const s = new Set(prev); s.delete(etiqueta); return s; });
       });
     } else {
       fetch("/api/me/intereses", {
@@ -151,6 +147,16 @@ function InteresesTab() {
 
   if (cargando) return <div className="cuenta-panel"><p className="cuenta-loading">Cargando...</p></div>;
 
+  const q = busqueda.toLowerCase();
+  const categoriasFiltradas = categorias
+    .map((cat) => {
+      const etiquetasFiltradas = q
+        ? cat.etiquetas.filter((t) => t.toLowerCase().includes(q) || cat.categoria.toLowerCase().includes(q))
+        : cat.etiquetas;
+      return { ...cat, etiquetas: etiquetasFiltradas };
+    })
+    .filter((cat) => cat.etiquetas.length > 0);
+
   return (
     <div className="cuenta-panel">
       <h3>Mis intereses</h3>
@@ -162,39 +168,29 @@ function InteresesTab() {
         type="text"
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
-        placeholder="Buscar curso o etiqueta..."
+        placeholder="Buscar categoría o etiqueta..."
       />
-      {cursosConEtiquetas.length === 0 ? (
+      {categoriasFiltradas.length === 0 ? (
         <p className="cuenta-loading">No hay etiquetas disponibles aún.</p>
       ) : (
         <div className="intereses-cursos">
-          {cursosConEtiquetas
-            .map((curso) => {
-              const q = busqueda.toLowerCase();
-              const etiquetasFiltradas = q
-                ? curso.etiquetas.filter((t) => t.toLowerCase().includes(q))
-                : curso.etiquetas;
-              const cursoCoincide = curso.titulo.toLowerCase().includes(q);
-              const etiquetasMostradas = cursoCoincide ? curso.etiquetas : etiquetasFiltradas;
-              if (etiquetasMostradas.length === 0) return null;
-              return (
-                <div key={curso.id} className="intereses-curso-grupo">
-                  <h4 className="intereses-curso-titulo">{curso.titulo}</h4>
-                  <div className="intereses-grid">
-                    {etiquetasMostradas.map((tag) => (
-                      <button
-                        key={tag}
-                        className={`interes-chip ${misIntereses.has(tag) ? "activo" : ""}`}
-                        onClick={() => toggleInteres(tag)}
-                      >
-                        {tag}
-                        <span className="chip-icono">{misIntereses.has(tag) ? "✓" : "+"}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          {categoriasFiltradas.map((cat) => (
+            <div key={cat.categoria} className="intereses-curso-grupo">
+              <h4 className="intereses-curso-titulo">{cat.categoria}</h4>
+              <div className="intereses-grid">
+                {cat.etiquetas.map((tag) => (
+                  <button
+                    key={tag}
+                    className={`interes-chip ${misIntereses.has(tag) ? "activo" : ""}`}
+                    onClick={() => toggleInteres(tag)}
+                  >
+                    {tag}
+                    <span className="chip-icono">{misIntereses.has(tag) ? "✓" : "+"}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

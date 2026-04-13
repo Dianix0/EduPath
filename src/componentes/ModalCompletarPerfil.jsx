@@ -5,7 +5,7 @@ export default function ModalCompletarPerfil({ usuario, onCompletado }) {
   const [edad, setEdad] = useState("");
   const [carrera, setCarrera] = useState("");
   const [carreras, setCarreras] = useState([]);
-  const [cursosConEtiquetas, setCursosConEtiquetas] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [interesesSeleccionados, setInteresesSeleccionados] = useState(new Set());
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -13,10 +13,10 @@ export default function ModalCompletarPerfil({ usuario, onCompletado }) {
   useEffect(() => {
     Promise.all([
       fetch("/api/carreras").then((r) => r.json()),
-      fetch("/api/cursos/con-etiquetas").then((r) => r.json()),
-    ]).then(([listaCarreras, listaCursos]) => {
+      fetch("/api/cursos/etiquetas-por-categoria").then((r) => r.json()),
+    ]).then(([listaCarreras, listaCats]) => {
       setCarreras(Array.isArray(listaCarreras) ? listaCarreras : []);
-      setCursosConEtiquetas(Array.isArray(listaCursos) ? listaCursos : []);
+      setCategorias(Array.isArray(listaCats) ? listaCats : []);
     });
   }, []);
 
@@ -113,15 +113,15 @@ export default function ModalCompletarPerfil({ usuario, onCompletado }) {
                 (selecciona al menos uno)
               </span>
             </label>
-            {cursosConEtiquetas.length === 0 ? (
+            {categorias.length === 0 ? (
               <p className="mcp-hint">Cargando etiquetas...</p>
             ) : (
               <div className="mcp-intereses-scroll">
-                {cursosConEtiquetas.map((curso) => (
-                  <div key={curso.id} className="mcp-curso-grupo">
-                    <p className="mcp-curso-titulo">{curso.titulo}</p>
+                {categorias.map((cat) => (
+                  <div key={cat.categoria} className="mcp-curso-grupo">
+                    <p className="mcp-curso-titulo">{cat.categoria}</p>
                     <div className="mcp-chips">
-                      {curso.etiquetas.map((tag) => (
+                      {cat.etiquetas.map((tag) => (
                         <button
                           key={tag}
                           type="button"
