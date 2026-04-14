@@ -123,6 +123,9 @@ function App() {
                 if ((!data.edad || !data.carrera) && data.rol !== "Administrador") {
                     setPerfilPendiente(true)
                 }
+                if (data.moodle_id) {
+                    fetch("/api/me/sync", { method: "POST", credentials: "include" })
+                }
             }
         })
         window.history.replaceState({}, '', '/')
@@ -139,6 +142,9 @@ function App() {
             setUsuario(data)
             if ((!data.edad || !data.carrera) && data.rol !== "Administrador") {
                 setPerfilPendiente(true)
+            }
+            if (data.moodle_id) {
+                fetch("/api/me/sync", { method: "POST", credentials: "include" })
             }
         })
   }, []);

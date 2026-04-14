@@ -1,7 +1,7 @@
 // src/hooks/useMoodle.js
 import { useState, useEffect, useCallback } from 'react';
 
-const BASE_URL = import.meta.env.VITE_MOODLE_SERVICE_URL || 'http://localhost:5050';
+const BASE_URL = import.meta.env.VITE_MOODLE_SERVICE_URL || '';
 
 async function fetchMoodle(endpoint, params = {}) {
   const cleanParams = Object.fromEntries(

@@ -12,6 +12,7 @@ from routes.sesion import sesion_bp
 from routes.admin import admin_bp
 from routes.actividad import actividad_bp
 from routes.recomendaciones import rec_bp
+from routes.moodle import moodle_bp
 
 load_dotenv()
 
@@ -64,6 +65,7 @@ app.register_blueprint(sesion_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(actividad_bp)
 app.register_blueprint(rec_bp)
+app.register_blueprint(moodle_bp)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 3000))

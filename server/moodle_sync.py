@@ -178,11 +178,11 @@ def sincronizar_cursos_estudiante(estudiante_id, moodle_user_id):
         if es_nueva:
             # Nueva interacción — solo registrar si hay actividad
             if progreso_norm > 0 or fecha:
+                pct_calificacion = _obtener_calificacion_curso(moodle_user_id, moodle_course_id)
                 execute_command(q.INSERT_INTERACCION, (
-                    estudiante_id, curso_id, 0, progreso_norm, 0, fecha
+                    estudiante_id, curso_id, pct_calificacion, progreso_norm, 0, fecha
                 ))
                 progreso_anterior = 0.0
-                calificacion      = 0.0
 
                 puntos_nuevos   = _calcular_puntos_nuevos(progreso_anterior, progreso_norm, pct_calificacion, True)
                 puntos_totales += puntos_nuevos

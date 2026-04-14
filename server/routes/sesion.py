@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, session
 from db import execute_query, execute_command
 from utils import serialize
 import queries as q
+from moodle_sync import sincronizar_cursos_estudiante
 
 sesion_bp = Blueprint("sesion", __name__, url_prefix="/api")
 
@@ -116,6 +117,25 @@ def set_session():
         return jsonify({"error": "Estudiante no encontrado"}), 404
     session["estudiante_id"] = estudiante_id
     return jsonify(serialize(df)[0])
+
+@sesion_bp.route("/me/sync", methods=["POST"])
+def sync_moodle():
+    estudiante_id = session.get("estudiante_id")
+    if not estudiante_id:
+        return jsonify({"error": "No hay sesion activa"}), 401
+    df = execute_query(q.GET_ESTUDIANTE_BY_ID, (estudiante_id,))
+    if df.is_empty():
+        return jsonify({"error": "Estudiante no encontrado"}), 404
+    estudiante = serialize(df)[0]
+    moodle_id = estudiante.get("moodle_id")
+    if not moodle_id:
+        return jsonify({"error": "Usuario sin moodle_id"}), 400
+    try:
+        sincronizar_cursos_estudiante(estudiante_id, moodle_id)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @sesion_bp.get("/me/gamificacion")
 def get_mi_gamificacion():
