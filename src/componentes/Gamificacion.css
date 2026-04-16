@@ -1,49 +1,252 @@
+/* ── Variables ──────────────────────────────────────────────────────────────── */
+:root {
+  --gami-naranja:      #ff6600;
+  --gami-naranja-lt:   #ffb347;
+  --gami-naranja-bg:   #fff8f0;
+  --gami-naranja-pale: #ffe0cc;
+  --gami-texto:        #2d2d2d;
+  --gami-muted:        #888;
+  --gami-radio:        16px;
+  --gami-sombra:       0 4px 20px rgba(255,102,0,0.12);
+}
+
+/* ── Contenedor principal ────────────────────────────────────────────────────── */
 .gamificacion-container {
-  background-color: #fff8f0;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  max-width: 400px;
+  background: var(--gami-naranja-bg);
+  padding: 28px 24px;
+  border-radius: var(--gami-radio);
+  box-shadow: var(--gami-sombra);
+  max-width: 420px;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  border: 1px solid rgba(255,102,0,0.1);
 }
 
 .gamificacion-titulo {
   text-align: center;
-  color: #ff6600;
-  margin-bottom: 20px;
+  color: var(--gami-naranja);
+  margin: 0 0 20px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.nivel-info, .puntos-info {
+/* ── Loading ─────────────────────────────────────────────────────────────────── */
+.gami-loading {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-weight: bold;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+  color: var(--gami-muted);
 }
 
-.progress-bar {
-  width: 100%;
-  background-color: #e0e0e0;
-  border-radius: 10px;
+.gami-spinner {
+  width: 36px;
+  height: 36px;
+  border: 4px solid var(--gami-naranja-pale);
+  border-top-color: var(--gami-naranja);
+  border-radius: 50%;
+  animation: gami-spin 0.8s linear infinite;
+}
+
+@keyframes gami-spin { to { transform: rotate(360deg); } }
+
+.gami-sin-sesion {
+  text-align: center;
+  color: var(--gami-muted);
+  padding: 24px 0;
+}
+
+/* ── Gráfica de arco ─────────────────────────────────────────────────────────── */
+.gami-arco-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.gami-arc-svg {
+  width: 160px;
+  height: 120px;
+}
+
+.gami-arc-fill {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: gami-arc-in 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes gami-arc-in {
+  to { stroke-dashoffset: 0; }
+}
+
+.gami-arc-nivel {
+  font-size: 13px;
+  font-weight: 800;
+  fill: var(--gami-naranja);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.gami-arc-pct {
+  font-size: 11px;
+  fill: var(--gami-muted);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.gami-puntos-label {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: -6px;
+  margin-bottom: 18px;
+}
+
+.gami-puntos-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gami-naranja);
+}
+
+.gami-puntos-de {
+  font-size: 0.85rem;
+  color: var(--gami-muted);
+}
+
+/* ── Stats (botones clickeables) ─────────────────────────────────────────────── */
+.gami-stats {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
   overflow: hidden;
-  height: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   margin-bottom: 20px;
+  border: 1px solid rgba(255,102,0,0.08);
 }
 
-.progress-fill {
-  background-color: #ff6600;
-  height: 100%;
-  transition: width 0.5s ease;
+.gami-stat-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 14px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.gami-stat-btn:hover {
+  background: var(--gami-naranja-bg);
+}
+
+.gami-stat-btn:active {
+  background: var(--gami-naranja-pale);
+}
+
+.gami-stat-divider {
+  width: 1px;
+  height: 48px;
+  background: rgba(255,102,0,0.15);
+  flex-shrink: 0;
+}
+
+.gami-stat-icono {
+  font-size: 1.3rem;
+}
+
+.gami-stat-num {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--gami-naranja);
+  line-height: 1;
+}
+
+.gami-stat-label {
+  font-size: 0.75rem;
+  color: var(--gami-muted);
+  font-weight: 500;
+}
+
+.gami-stat-arrow {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 1rem;
+  color: var(--gami-naranja-pale);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.gami-stat-btn:hover .gami-stat-arrow {
+  color: var(--gami-naranja);
+  transform: translateX(2px);
+}
+
+/* ── Próxima insignia ────────────────────────────────────────────────────────── */
+.gami-proxima {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px dashed var(--gami-naranja-pale);
+}
+
+.gami-proxima-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gami-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.gami-proxima-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gami-proxima-img-wrap {
+  width: 42px;
+  height: 42px;
+}
+
+.gami-proxima-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: blur(3px) grayscale(100%) opacity(0.45);
+}
+
+.gami-proxima-nombre {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gami-texto);
+}
+
+/* ── Insignias ───────────────────────────────────────────────────────────────── */
+.insignas-container {
+  margin-top: 4px;
 }
 
 .insignas-container h3 {
-  margin-bottom: 10px;
-  color: #333;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gami-texto);
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .insignas-lista {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -51,22 +254,266 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 70px;
+  gap: 5px;
+}
+
+/* Insignias obtenidas */
+.insignas-img-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #fff4eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255,102,0,0.2);
+  border: 2px solid var(--gami-naranja-pale);
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.insignas-item:not(.insignas-bloqueada):hover .insignas-img-wrap {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(255,102,0,0.3);
 }
 
 .insignas-img {
-  width: 50px;
-  height: 50px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
+  transition: filter 0.3s;
+  mix-blend-mode: multiply;
 }
 
 .insignas-nombre {
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
-  margin-top: 4px;
+  color: var(--gami-texto);
+  font-weight: 600;
+  max-width: 60px;
 }
 
 .sin-insignas {
-  font-size: 14px;
-  color: #999;
+  font-size: 13px;
+  color: var(--gami-muted);
+  font-style: italic;
+}
+
+/* ── Insignias bloqueadas (blur) ─────────────────────────────────────────────── */
+.insignas-bloqueada .insignas-img-wrap {
+  border-color: #e5e7eb;
+  box-shadow: none;
+  background: #f9fafb;
+}
+
+.insignas-bloqueada .insignas-img {
+  filter: blur(3px) grayscale(100%) opacity(0.45);
+  transform: scale(0.95);
+}
+
+.insignas-bloqueada .insignas-nombre {
+  color: #9ca3af;
+}
+
+.insignas-lock-label {
+  font-size: 9px;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-top: -2px;
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────────────── */
+.gami-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: gami-fade-in 0.2s ease;
+}
+
+@keyframes gami-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.gami-modal {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: gami-modal-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+@keyframes gami-modal-in {
+  from { transform: scale(0.92) translateY(16px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.gami-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.gami-modal-titulo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gami-modal-icono {
+  font-size: 1.4rem;
+}
+
+.gami-modal-titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--gami-texto);
+}
+
+.gami-modal-cerrar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--gami-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.gami-modal-cerrar:hover {
+  background: var(--gami-naranja-pale);
+  color: var(--gami-naranja);
+}
+
+.gami-modal-lista {
+  overflow-y: auto;
+  padding: 16px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gami-modal-vacio {
+  text-align: center;
+  color: var(--gami-muted);
+  font-size: 0.9rem;
+  padding: 24px 0;
+}
+
+.gami-modal-curso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--gami-naranja-bg);
+  border-radius: 12px;
+  border: 1px solid rgba(255,102,0,0.08);
+  transition: box-shadow 0.2s;
+}
+
+.gami-modal-curso:hover {
+  box-shadow: 0 2px 12px rgba(255,102,0,0.12);
+}
+
+.gami-modal-curso-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.gami-modal-curso-cat {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gami-naranja);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.gami-modal-curso-titulo {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gami-texto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gami-modal-barra-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gami-modal-barra {
+  flex: 1;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.gami-modal-barra-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gami-naranja), var(--gami-naranja-lt));
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+
+.gami-modal-pct {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gami-naranja);
+  min-width: 32px;
+  text-align: right;
+}
+
+.gami-modal-cal {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.gami-modal-btn-ir {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: var(--gami-naranja);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.gami-modal-btn-ir:hover {
+  background: #e55a00;
+  transform: translateX(2px);
 }

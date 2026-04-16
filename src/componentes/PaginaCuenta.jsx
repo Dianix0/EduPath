@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./PaginaCuenta.css";
 import AdminTab from "./AdminTab";
+import MoodlePanel from "./moodle/MoodlePanel";
 
 function ConfiguracionTab({ usuario, onActualizado }) {
   const [email, setEmail] = useState(usuario.email || "");
@@ -26,13 +27,13 @@ function ConfiguracionTab({ usuario, onActualizado }) {
     setMensaje("");
     setError("");
     setCargando(true);
-    fetch("/api/me/configuracion", {
+    fetch("/api/me/configuracion", { credentials: 'include' }, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: email.trim(),
+        //email: email.trim(),
         edad: parseInt(edad) || null,
-        carrera: parseInt(carrera) || null,
+        //carrera: parseInt(carrera) || null,
       }),
     })
       .then((res) => res.json())
@@ -62,12 +63,11 @@ function ConfiguracionTab({ usuario, onActualizado }) {
         </div>
         <div className="cuenta-field">
           <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
-          />
+          <input type="email" value={email} disabled className="disabled" />
+        </div>
+        <div className="cuenta-field">
+          <label>Carrera</label>
+          <input value={usuario.carrera?.nombre || "Sin carrera asignada"} disabled className="disabled" />
         </div>
         <div className="cuenta-field">
           <label>Edad</label>
@@ -79,15 +79,6 @@ function ConfiguracionTab({ usuario, onActualizado }) {
             onChange={(e) => setEdad(e.target.value)}
             placeholder="Ej: 21"
           />
-        </div>
-        <div className="cuenta-field">
-          <label>Carrera</label>
-          <select value={carrera} onChange={(e) => setCarrera(e.target.value)}>
-            <option value="">Selecciona tu carrera</option>
-            {carreras.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </select>
         </div>
         {mensaje && <p className="cuenta-ok">{mensaje}</p>}
         {error && <p className="cuenta-error">{error}</p>}
@@ -116,17 +107,17 @@ function ConfiguracionTab({ usuario, onActualizado }) {
 }
 
 function InteresesTab() {
-  const [cursosConEtiquetas, setCursosConEtiquetas] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [misIntereses, setMisIntereses] = useState(new Set());
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/cursos/con-etiquetas").then((r) => r.json()),
-      fetch("/api/me/intereses").then((r) => r.json()),
-    ]).then(([cursos, intereses]) => {
-      setCursosConEtiquetas(Array.isArray(cursos) ? cursos : []);
+      fetch("/api/cursos/etiquetas-por-categoria", { credentials: 'include' }).then((r) => r.json()),
+      fetch("/api/me/intereses", { credentials: 'include' }).then((r) => r.json()),
+    ]).then(([cats, intereses]) => {
+      setCategorias(Array.isArray(cats) ? cats : []);
       setMisIntereses(new Set(
         Array.isArray(intereses) ? intereses.map((i) => i.interes) : []
       ));
@@ -138,16 +129,14 @@ function InteresesTab() {
     if (misIntereses.has(etiqueta)) {
       fetch(`/api/me/intereses/${encodeURIComponent(etiqueta)}`, {
         method: "DELETE",
+        credentials: 'include',
       }).then(() => {
-        setMisIntereses((prev) => {
-          const s = new Set(prev);
-          s.delete(etiqueta);
-          return s;
-        });
+        setMisIntereses((prev) => { const s = new Set(prev); s.delete(etiqueta); return s; });
       });
     } else {
       fetch("/api/me/intereses", {
         method: "POST",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ interes: etiqueta }),
       }).then(() => {
@@ -157,6 +146,16 @@ function InteresesTab() {
   };
 
   if (cargando) return <div className="cuenta-panel"><p className="cuenta-loading">Cargando...</p></div>;
+
+  const q = busqueda.toLowerCase();
+  const categoriasFiltradas = categorias
+    .map((cat) => {
+      const etiquetasFiltradas = q
+        ? cat.etiquetas.filter((t) => t.toLowerCase().includes(q) || cat.categoria.toLowerCase().includes(q))
+        : cat.etiquetas;
+      return { ...cat, etiquetas: etiquetasFiltradas };
+    })
+    .filter((cat) => cat.etiquetas.length > 0);
 
   return (
     <div className="cuenta-panel">
@@ -169,39 +168,29 @@ function InteresesTab() {
         type="text"
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
-        placeholder="Buscar curso o etiqueta..."
+        placeholder="Buscar categoría o etiqueta..."
       />
-      {cursosConEtiquetas.length === 0 ? (
+      {categoriasFiltradas.length === 0 ? (
         <p className="cuenta-loading">No hay etiquetas disponibles aún.</p>
       ) : (
         <div className="intereses-cursos">
-          {cursosConEtiquetas
-            .map((curso) => {
-              const q = busqueda.toLowerCase();
-              const etiquetasFiltradas = q
-                ? curso.etiquetas.filter((t) => t.toLowerCase().includes(q))
-                : curso.etiquetas;
-              const cursoCoincide = curso.titulo.toLowerCase().includes(q);
-              const etiquetasMostradas = cursoCoincide ? curso.etiquetas : etiquetasFiltradas;
-              if (etiquetasMostradas.length === 0) return null;
-              return (
-                <div key={curso.id} className="intereses-curso-grupo">
-                  <h4 className="intereses-curso-titulo">{curso.titulo}</h4>
-                  <div className="intereses-grid">
-                    {etiquetasMostradas.map((tag) => (
-                      <button
-                        key={tag}
-                        className={`interes-chip ${misIntereses.has(tag) ? "activo" : ""}`}
-                        onClick={() => toggleInteres(tag)}
-                      >
-                        {tag}
-                        <span className="chip-icono">{misIntereses.has(tag) ? "✓" : "+"}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          {categoriasFiltradas.map((cat) => (
+            <div key={cat.categoria} className="intereses-curso-grupo">
+              <h4 className="intereses-curso-titulo">{cat.categoria}</h4>
+              <div className="intereses-grid">
+                {cat.etiquetas.map((tag) => (
+                  <button
+                    key={tag}
+                    className={`interes-chip ${misIntereses.has(tag) ? "activo" : ""}`}
+                    onClick={() => toggleInteres(tag)}
+                  >
+                    {tag}
+                    <span className="chip-icono">{misIntereses.has(tag) ? "✓" : "+"}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -213,7 +202,7 @@ function MisCursosTab() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("/api/me/mis-cursos")
+    fetch("/api/me/mis-cursos", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
         setCursos(Array.isArray(data) ? data : []);
@@ -262,7 +251,7 @@ export default function PaginaCuenta() {
   const [sinSesion, setSinSesion] = useState(false);
 
   useEffect(() => {
-    fetch("/api/me")
+    fetch("/api/me", { credentials: 'include' })
       .then((res) => {
         if (!res.ok) { setSinSesion(true); return null; }
         return res.json();
@@ -284,6 +273,12 @@ export default function PaginaCuenta() {
     return <div className="cuenta-container"><p className="cuenta-loading">Cargando...</p></div>;
   }
 
+  // Mapeo de roles de Edupath a roles del MoodlePanel
+  const rolMoodle =
+    usuario.rol === "Administrador" ? "admin" :
+    usuario.rol === "Docente"       ? "docente" :
+    "estudiante";
+
   return (
     <div className="cuenta-container">
       <aside className="cuenta-sidebar">
@@ -303,12 +298,15 @@ export default function PaginaCuenta() {
           >
             Intereses
           </button>
+          {/*
           <button
             className={tab === "miscursos" ? "activo" : ""}
             onClick={() => setTab("miscursos")}
           >
             Mis cursos
           </button>
+          */}
+          
           {usuario.rol === "Administrador" && (
             <button
               className={tab === "herramienta" ? "activo" : ""}
@@ -325,7 +323,10 @@ export default function PaginaCuenta() {
           <ConfiguracionTab usuario={usuario} onActualizado={setUsuario} />
         )}
         {tab === "intereses" && <InteresesTab />}
+        {/*}
         {tab === "miscursos" && <MisCursosTab />}
+        */}
+
         {tab === "herramienta" && (
           <div className="cuenta-panel">
             <h3>Configuración de la herramienta</h3>

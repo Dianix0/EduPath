@@ -101,6 +101,30 @@ def get_cursos_con_etiquetas():
     return jsonify(list(cursos.values()))
 
 
+@curso_bp.get("/etiquetas-por-categoria")
+def get_etiquetas_por_categoria():
+    df = execute_query("""
+        SELECT c.categoria, ce.etiqueta
+        FROM CursoEtiqueta ce
+        JOIN Curso c ON c.id = ce.curso_id
+        WHERE c.categoria IS NOT NULL AND c.categoria != ''
+        ORDER BY c.categoria, ce.etiqueta
+    """)
+    if df.is_empty():
+        return jsonify([])
+    categorias = {}
+    for row in serialize(df):
+        cat = row["categoria"]
+        tag = row["etiqueta"]
+        if cat not in categorias:
+            categorias[cat] = set()
+        categorias[cat].add(tag)
+    return jsonify([
+        {"categoria": cat, "etiquetas": sorted(list(tags))}
+        for cat, tags in sorted(categorias.items())
+    ])
+
+
 @curso_bp.get("/<int:id>/etiquetas")
 def get_etiquetas(id):
     df = execute_query(q.GET_ETIQUETAS_BY_CURSO, (id,))

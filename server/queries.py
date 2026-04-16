@@ -81,6 +81,8 @@ GET_ALL_CURSOS = "SELECT * FROM Curso"
 
 GET_CURSO_BY_ID = "SELECT * FROM Curso WHERE id = %s"
 
+GET_CURSO_BY_MOODLE_ID = "SELECT * FROM Curso WHERE moodle_id = %s"
+
 INSERT_CURSO = """
     INSERT INTO Curso (titulo, descripcion, categoria, duracion)
     VALUES (%s, %s, %s, %s)
@@ -170,6 +172,36 @@ DELETE_INTERACCION = """
     WHERE estudiante_id = %s AND curso_id = %s
 """
 
+# ============================================================
+# GAMIFICACIÓN
+# ============================================================
+UPDATE_PUNTOS_NIVEL = """
+    UPDATE Estudiante
+    SET puntos = %s, nivel = %s
+    WHERE id = %s
+"""
+
+GET_CURSOS_COMPLETADOS = """
+    SELECT COUNT(*) as total
+    FROM InteraccionCurso
+    WHERE estudiante_id = %s AND progreso >= 1.0
+"""
+
+GET_CURSOS_COMPLETADOS_BD = """
+    SELECT COUNT(*) as total
+    FROM InteraccionCurso ic
+    JOIN Curso c ON ic.curso_id = c.id
+    WHERE ic.estudiante_id = %s
+    AND ic.progreso >= 1.0
+    AND c.categoria = 'Bases de Datos 1'
+"""
+
+GET_INTERACCIONES_ESTUDIANTE_DETALLE = """
+    SELECT ic.*, c.categoria
+    FROM InteraccionCurso ic
+    JOIN Curso c ON ic.curso_id = c.id
+    WHERE ic.estudiante_id = %s
+"""
 
 # ============================================================
 # ACTIVIDAD
@@ -286,7 +318,6 @@ INSERT_RESPUESTA = """
     VALUES (%s, %s, %s, %s, %s)
 """
 
-
 # ============================================================
 # INTERACCION CURSO - progreso / tiempo / calificacion
 # ============================================================
@@ -339,7 +370,6 @@ GET_INTERACCION_BY_ESTUDIANTE_CURSO = """
     WHERE estudiante_id = %s AND curso_id = %s
 """
 
-
 # ============================================================
 # RECOMENDACIONES
 # ============================================================
@@ -368,7 +398,7 @@ GET_CURSOS_EN_PROGRESO = """
            ic.progreso, ic.calificacion, ic.fecha_ultima_actividad
     FROM InteraccionCurso ic
     JOIN Curso c ON ic.curso_id = c.id
-    WHERE ic.estudiante_id = %s AND ic.progreso > 0
+    WHERE ic.estudiante_id = %s
     ORDER BY ic.fecha_ultima_actividad DESC
 """
 
