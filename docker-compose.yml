@@ -1,0 +1,80 @@
+services:
+
+  db:
+    image: mysql:8
+    restart: always
+    command: --lower-case-table-names=1
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: edupath
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  moodle:
+    build: ./moodle
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - moodle_www:/var/www/html
+      - moodle_data_dir:/var/moodledata
+    expose:
+      - "80"
+
+  web:
+    build: ./server
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: edupath
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
+      MOODLE_URL: ${MOODLE_URL}
+      MOODLE_CLIENT_ID: ${MOODLE_CLIENT_ID}
+      MOODLE_DEPLOYMENT_IDS: ${MOODLE_DEPLOYMENT_IDS}
+      MOODLE_WS_TOKEN: ${MOODLE_WS_TOKEN}
+    volumes:
+      - ./server/uploads:/app/uploads
+      - ./dist:/dist
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    depends_on:
+      - web
+      - moodle
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  mysql_data:
+  moodle_www:
+  moodle_data_dir:
+  certbot_www:
+  certbot_conf:

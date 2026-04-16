@@ -5,49 +5,23 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: "Poppins", sans-serif;
-  background-color: #f9f9fb; /* fondo neutro */
+  background-color: #f9f9fb;
   color: #333;
   line-height: 1.6;
   min-height: 100vh;
-}
-
-/* === HEADER === */
-header {
-  position: sticky;
-  top: 0;
-  background-color: #ff7b00; /* naranja moderno */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  padding: 1rem 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 50;
+  flex-direction: column;
 }
 
-header h1 {
-  color: white;
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-nav ul {
-  list-style: none;
-  display: flex;
-  gap: 1.5rem;
-}
-
-nav a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-nav a:hover {
-  color: #ffe0c2;
+/* === UTILITIES === */
+button {
+  font-family: inherit;
 }
 
 /* === HERO SECTION === */
@@ -61,7 +35,7 @@ nav a:hover {
 }
 
 .hero h2 {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
   color: #2d2d2d;
   margin-bottom: 1rem;
@@ -123,7 +97,7 @@ nav a:hover {
 }
 
 .features h3 {
-  font-size: 2rem;
+  font-size: clamp(1.4rem, 3vw, 2rem);
   color: #2d2d2d;
   margin-bottom: 2.5rem;
   font-weight: 700;
@@ -131,9 +105,9 @@ nav a:hover {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-  max-width: 1000px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -168,17 +142,25 @@ footer {
   text-align: center;
   padding: 2rem;
   font-size: 0.9rem;
+  margin-top: auto;
+  /*position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;*/
 }
 
 footer strong {
   color: #ff7b00;
 }
 
-/* === UTILITIES === */
-button {
-  font-family: inherit;
-}
+/* === RESPONSIVE GENERAL === */
+@media (max-width: 768px) {
+  .hero {
+    padding: 4rem 1.5rem 3rem;
+  }
 
-html {
-  scroll-behavior: smooth;
+  .features {
+    padding: 3rem 1.5rem;
+  }
 }
