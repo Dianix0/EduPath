@@ -414,11 +414,15 @@ function TabCalificaciones({ califs, cursosMap }) {
                 </td>
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+                    const pct = cal.grade_max > 0
+                      ? (cal.final_grade / cal.grade_max) * 100
+                      : 0;
                     <span style={{
                       fontWeight: 700, fontSize: '14px',
                       color: pct ? (pct >= 60 ? '#15803d' : '#991b1b') : GRIS_TEXTO,
                     }}>
-                      {cal.final_grade.toFixed(1)}
+                      {cal.final_grade.toFixed(1)} / {cal.grade_max} ({Math.round(pct)}%)
                     </span>
                     <span style={{ color: '#9ca3af', fontSize: '12px' }}>/ {cal.grade_max.toFixed(0)}</span>
                     {pct !== null && (
@@ -446,6 +450,7 @@ function TabCalificaciones({ califs, cursosMap }) {
 // ── TAB: Logros ───────────────────────────────────────────────────────────────
 function TabLogros({ gami }) {
   const [insigniaSeleccionada, setInsigniaSeleccionada] = useState(null);
+  console.log("GAMIFICACION FRONT:", gami);
 
   if (!gami) return (
     <div style={{ textAlign: 'center', padding: '48px', color: GRIS_MID, fontSize: '14px' }}>
@@ -658,11 +663,17 @@ export default function VistaEstudiante({ userId }) {
   const [gami, setGami] = useState(null);
 
   const { data: progreso, loading: lProg  } = useProgreso({ userid: userId });
+  console.log("PROGRESO FRONT:", progreso);
   const { data: cursos,   loading: lCurso  } = useCursos();
-  const { data: califs,   loading: lCalif  } = useCalificaciones({ userid: userId });
+  const { data: califs=[],   loading: lCalif  } = useCalificaciones({ userid: userId });
+  const calificacionesFix = califs.map(c => ({
+    ...c,
+    final_grade: c.final_grade < 0 ? 0 : c.final_grade
+  }));
+  console.log("CALIFICACIONES FRONT:", calificacionesFix);
 
   useEffect(() => {
-    fetch('/api/me/gamificacion', { credentials: 'include' })
+    fetch(`/api/me/gamificacion?userid=${userId}`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data && !data.error) setGami(data); });
   }, []);
@@ -690,7 +701,7 @@ export default function VistaEstudiante({ userId }) {
 
   const tabs = [
     { id: 'cursos',         label: 'Mis Cursos',     count: misCursos.length },
-    { id: 'calificaciones', label: 'Calificaciones', count: califs.filter(c => c.final_grade >= 0).length },
+    { id: 'calificaciones', label: 'Calificaciones', count: calificacionesFix.filter(c => c.final_grade >= 0).length },
     { id: 'logros',         label: 'Logros',         count: null },
   ];
 
@@ -720,7 +731,7 @@ export default function VistaEstudiante({ userId }) {
       <TabBar tabs={tabs} active={tab} onChange={setTab} />
 
       {tab === 'cursos'         && <TabCursos misCursos={misCursos} progresoMap={progresoMap} />}
-      {tab === 'calificaciones' && <TabCalificaciones califs={califs} cursosMap={cursosMap} />}
+      {tab === 'calificaciones' && <TabCalificaciones califs={calificacionesFix} cursosMap={cursosMap} />}
       {tab === 'logros'         && <TabLogros gami={gami} />}
     </div>
   );

@@ -17,8 +17,8 @@ CORS(app)  # Permite llamadas desde el frontend React/Vite
 # ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 # Puedes mover estos valores a variables de entorno o a un archivo .env
 
-MOODLE_URL   = os.getenv("MOODLE_URL",   "http://192.168.1.122/moodle")
-MOODLE_TOKEN = os.getenv("MOODLE_TOKEN", "TU_TOKEN_AQUI")
+MOODLE_URL   = os.getenv("MOODLE_URL")
+MOODLE_TOKEN = os.getenv("MOODLE_WS_TOKEN")
 
 # Token interno para proteger los endpoints de Edupath (opcional pero recomendado)
 EDUPATH_API_KEY = os.getenv("EDUPATH_API_KEY", "edupath_internal_key_2026")
@@ -161,7 +161,14 @@ def get_progreso():
         if request.args.get("userid"):   params["userid"]   = int(request.args["userid"])
         # print(f"DEBUG progreso params: {params}")
 
-        progreso = paginate_moodle("local_edupath_get_progress", params, page_size=500)
+        params = {}
+        if request.args.get("courseid"):
+            params["courseid"] = int(request.args.get("courseid"))
+        if request.args.get("userid"):
+            params["userid"] = int(request.args.get("userid"))
+
+        progreso = moodle_call("local_edupath_get_progress", params)
+        #progreso = paginate_moodle("local_edupath_get_progress", params, page_size=500)
         return jsonify({"total": len(progreso), "progreso": progreso})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

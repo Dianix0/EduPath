@@ -20,13 +20,20 @@ export default function ModalCompletarPerfil({ usuario, onCompletado }) {
     });
   }, []);
 
-  const toggleInteres = (tag) => {
-    setInteresesSeleccionados((prev) => {
-      const s = new Set(prev);
-      s.has(tag) ? s.delete(tag) : s.add(tag);
-      return s;
-    });
-  };
+const MAX = 6;
+
+const toggleInteres = (tag) => {
+  setInteresesSeleccionados((prev) => {
+    const s = new Set(prev);
+
+    if (!s.has(tag) && s.size >= MAX) {
+      return s; // bloquea si ya hay 6
+    }
+
+    s.has(tag) ? s.delete(tag) : s.add(tag);
+    return s;
+  });
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();

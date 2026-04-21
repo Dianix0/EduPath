@@ -70,11 +70,18 @@ export function useUsuarios() {
   return useMoodleData('/api/moodle/usuarios', {}, 'usuarios');
 }
 
-export function useProgreso({ courseid, userid } = {}) {
-  const params = {};
-  if (courseid) params.courseid = courseid;
-  if (userid)   params.userid   = userid;
-  return useMoodleData('/api/moodle/progreso', params, 'progreso');
+//export function useProgreso({ courseid, userid } = {}) {
+  //const params = {};
+  //if (courseid) params.courseid = courseid;
+  //if (userid)   params.userid   = userid;
+  //return useMoodleData('/api/moodle/progreso', params, 'progreso');
+//}
+
+export function useProgreso() {
+  return useMoodleData('/api/moodle/progreso', {
+    courseid: 3,
+    userid: 101
+  }, 'progreso');
 }
 
 export function useCalificaciones({ courseid, userid } = {}) {
