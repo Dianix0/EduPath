@@ -390,7 +390,16 @@ function TabCalificaciones({ califs, cursosMap }) {
         </thead>
         <tbody>
           {conNota.map((cal, i) => {
-            const pct         = cal.percent > 0 ? cal.percent : null;
+            //const pct         = cal.percent > 0 ? cal.percent : null;
+            const nota = cal.final_grade;
+            let max = cal.grade_max;
+
+            // 🔥 FIX ESCALA MOODLE
+            if (max === 100 && nota <= 5) {
+              max = 5;
+            }
+
+            const pct = max > 0 ? (nota / max) * 100 : null;
             const colors      = pct ? notaColor(pct) : { color: GRIS_MID, bg: '#f3f4f6' };
             const nombreCurso = cursosMap[cal.course_id]?.fullname || cal.courseshortname;
             return (
@@ -415,22 +424,21 @@ function TabCalificaciones({ califs, cursosMap }) {
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
-                    const pct = cal.grade_max > 0
-                      ? (cal.final_grade / cal.grade_max) * 100
-                      : 0;
                     <span style={{
                       fontWeight: 700, fontSize: '14px',
                       color: pct ? (pct >= 60 ? '#15803d' : '#991b1b') : GRIS_TEXTO,
                     }}>
-                      {cal.final_grade.toFixed(1)} / {cal.grade_max} ({Math.round(pct)}%)
+                      {nota.toFixed(1)} / {max} ({Math.round(pct)}%)
                     </span>
-                    <span style={{ color: '#9ca3af', fontSize: '12px' }}>/ {cal.grade_max.toFixed(0)}</span>
+                    <span style={{ color: '#9ca3af', fontSize: '12px' }}>
+                      escala {max}
+                    </span>
                     {pct !== null && (
                       <span style={{
                         fontSize: '11px', fontWeight: 700, padding: '1px 8px',
                         borderRadius: '99px', color: colors.color, background: colors.bg,
                       }}>
-                        {pct.toFixed(0)}%
+                        {Math.round(pct)}%
                       </span>
                     )}
                   </div>
@@ -693,7 +701,9 @@ export default function VistaEstudiante({ userId }) {
   }, [cursos]);
 
   const misCursoIds = new Set(progreso.map(p => p.course_id));
-  const misCursos   = cursos.filter(c => misCursoIds.has(c.id));
+  const misCursos   = cursos.filter(c => misCursoIds.has(c.moodle_id));
+  console.log("PROGRESO:", progreso);
+  console.log("CURSOS:", cursos);
   const completados = progreso.filter(p => p.completed).length;
   const avance      = progreso.length
     ? Math.round(progreso.reduce((s, p) => s + p.percent, 0) / progreso.length)
